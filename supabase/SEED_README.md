@@ -1,16 +1,45 @@
 # Test Users Documentation
 
-This document contains information about the test users created by the seed script.
+This document contains information about the test users and seeding process.
 
-## Running the Seed
+## Two-Step Seeding Process
+
+### Step 1: Database Seed (SQL)
+
+Seeds stores, categories, and products:
 
 ```bash
-# Reset database and apply seed
+# Reset database and apply migrations + seed
 supabase db reset
-
-# Or manually run the seed
-psql -h localhost -p 54322 -U postgres -d postgres < supabase/seed.sql
 ```
+
+This creates:
+- 3 stores (Downtown, Uptown, Brooklyn)
+- Product categories
+- 9 sample products
+
+### Step 2: User Seed (Admin API)
+
+Seeds test users using Supabase Admin API:
+
+```bash
+# Create test users with proper authentication
+pnpm seed:users
+```
+
+This creates 6 test users with proper bcrypt password hashing.
+
+## Why Two Steps?
+
+Following Supabase's official recommendations:
+- ✅ **SQL seed**: For business data (stores, products, categories)
+- ✅ **Admin API**: For authentication data (users, passwords)
+
+The Admin API approach:
+- Handles bcrypt password hashing automatically
+- Triggers proper auth workflows
+- Skips email verification for test users
+- Updates profile roles correctly
 
 ## Test Accounts
 
@@ -118,9 +147,34 @@ The seed creates 9 sample products distributed across the three stores:
 3. Cannot access Products, Stores, or Reports pages
 4. Can view products in their assigned store via POS
 
+## Re-seeding Users
+
+To delete and recreate test users:
+
+```bash
+# The script automatically deletes existing test users before creating new ones
+pnpm seed:users
+```
+
 ## Security Notes
 
 - These credentials are **FOR DEVELOPMENT ONLY**
 - Never use these accounts or passwords in production
-- The password hash in seed.sql is intentionally weak for development
-- In production, use proper authentication via Supabase Auth API
+- The Admin API approach is the recommended way to seed auth users
+- In production, use proper authentication via Supabase Auth API with email verification
+
+## Technical Details
+
+**Files:**
+- `supabase/seed.sql` - SQL seed for business data
+- `supabase/seed.ts` - TypeScript seed for user authentication
+- `package.json` - Contains `seed:users` script
+
+**Dependencies:**
+- `@supabase/supabase-js` - Supabase client
+- `tsx` - TypeScript execution
+
+**Supabase Ports (Local):**
+- API URL: http://127.0.0.1:9000
+- Database: postgresql://postgres:postgres@127.0.0.1:9001/postgres
+- Studio: http://127.0.0.1:9002

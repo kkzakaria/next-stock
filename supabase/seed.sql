@@ -15,68 +15,12 @@ INSERT INTO public.stores (id, name, address, phone, email) VALUES
   ('33333333-3333-3333-3333-333333333333', 'Brooklyn Store', '789 Atlantic Avenue, Brooklyn, NY 11217', '+1-555-0103', 'brooklyn@nextstock.com');
 
 -- ============================================================================
--- TEST USERS & PROFILES
+-- TEST USERS
 -- ============================================================================
+-- Users are now seeded using the Supabase Admin API (recommended approach)
+-- Run: pnpm seed:users (after running supabase db reset)
+-- See: supabase/seed.ts for user seeding implementation
 -- Password for all test users: "password123"
--- Bcrypt hash: $2a$10$XKLz/vPqHqK5xK5xK5xK5eqK5xK5xK5xK5xK5xK5xK5xK5xK5xK5xO
-
-DELETE FROM auth.users WHERE email LIKE '%@test.nextstock.com';
-
-INSERT INTO auth.users (
-  instance_id,
-  id,
-  aud,
-  role,
-  email,
-  encrypted_password,
-  email_confirmed_at,
-  recovery_sent_at,
-  last_sign_in_at,
-  raw_app_meta_data,
-  raw_user_meta_data,
-  created_at,
-  updated_at,
-  confirmation_token,
-  email_change,
-  email_change_token_new,
-  recovery_token
-) VALUES
-  ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'authenticated', 'authenticated',
-   'admin@test.nextstock.com', '\$2a\$10\$XKLz/vPqHqK5xK5xK5xK5eqK5xK5xK5xK5xK5xK5xK5xK5xK5xK5xO',
-   NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Admin User"}',
-   NOW(), NOW(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'authenticated', 'authenticated',
-   'manager1@test.nextstock.com', '\$2a\$10\$XKLz/vPqHqK5xK5xK5xK5eqK5xK5xK5xK5xK5xK5xK5xK5xK5xK5xO',
-   NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Manager Downtown"}',
-   NOW(), NOW(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'authenticated', 'authenticated',
-   'manager2@test.nextstock.com', '\$2a\$10\$XKLz/vPqHqK5xK5xK5xK5eqK5xK5xK5xK5xK5xK5xK5xK5xK5xK5xO',
-   NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Manager Uptown"}',
-   NOW(), NOW(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000', 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'authenticated', 'authenticated',
-   'cashier1@test.nextstock.com', '\$2a\$10\$XKLz/vPqHqK5xK5xK5xK5xK5eqK5xK5xK5xK5xK5xK5xK5xK5xK5xO',
-   NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Cashier Downtown"}',
-   NOW(), NOW(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'authenticated', 'authenticated',
-   'cashier2@test.nextstock.com', '\$2a\$10\$XKLz/vPqHqK5xK5xK5xK5eqK5xK5xK5xK5xK5xK5xK5xK5xK5xK5xO',
-   NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Cashier Uptown"}',
-   NOW(), NOW(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000', 'ffffffff-ffff-ffff-ffff-ffffffffffff', 'authenticated', 'authenticated',
-   'cashier3@test.nextstock.com', '\$2a\$10\$XKLz/vPqHqK5xK5xK5xK5eqK5xK5xK5xK5xK5xK5xK5xK5xK5xK5xO',
-   NOW(), NOW(), NOW(), '{"provider":"email","providers":["email"]}', '{"full_name":"Cashier Brooklyn"}',
-   NOW(), NOW(), '', '', '', '');
-
-INSERT INTO public.profiles (id, email, role, store_id, full_name) VALUES
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'admin@test.nextstock.com', 'admin', NULL, 'Admin User'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'manager1@test.nextstock.com', 'manager', '11111111-1111-1111-1111-111111111111', 'Manager Downtown'),
-  ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'manager2@test.nextstock.com', 'manager', '22222222-2222-2222-2222-222222222222', 'Manager Uptown'),
-  ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'cashier1@test.nextstock.com', 'cashier', '11111111-1111-1111-1111-111111111111', 'Cashier Downtown'),
-  ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'cashier2@test.nextstock.com', 'cashier', '22222222-2222-2222-2222-222222222222', 'Cashier Uptown'),
-  ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'cashier3@test.nextstock.com', 'cashier', '33333333-3333-3333-3333-333333333333', 'Cashier Brooklyn')
-ON CONFLICT (id) DO UPDATE SET
-  role = EXCLUDED.role,
-  store_id = EXCLUDED.store_id,
-  full_name = EXCLUDED.full_name;
 
 -- ============================================================================
 -- SAMPLE PRODUCTS
