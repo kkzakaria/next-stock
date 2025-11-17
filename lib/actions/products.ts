@@ -22,10 +22,10 @@ const productSchema = z.object({
 
 type ProductInput = z.infer<typeof productSchema>
 
-interface ActionResult {
+interface ActionResult<T = unknown> {
   success: boolean
   error?: string
-  data?: any
+  data?: T
 }
 
 /**
@@ -87,7 +87,7 @@ export async function createProduct(data: ProductInput): Promise<ActionResult> {
   } catch (error) {
     console.error('Product creation error:', error)
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message }
+      return { success: false, error: error.issues[0].message }
     }
     return { success: false, error: 'Failed to create product' }
   }
@@ -165,7 +165,7 @@ export async function updateProduct(id: string, data: Partial<ProductInput>): Pr
   } catch (error) {
     console.error('Product update error:', error)
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message }
+      return { success: false, error: error.issues[0].message }
     }
     return { success: false, error: 'Failed to update product' }
   }
@@ -268,7 +268,7 @@ export async function getProducts(storeId?: string) {
       .order('created_at', { ascending: false })
 
     // Apply store filter based on role
-    if (profile.role !== 'admin') {
+    if (profile.role !== 'admin' && profile.store_id) {
       query = query.eq('store_id', profile.store_id)
     } else if (storeId) {
       query = query.eq('store_id', storeId)

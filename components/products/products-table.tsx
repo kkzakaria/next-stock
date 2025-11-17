@@ -42,8 +42,8 @@ interface Product {
   price: number
   cost: number | null
   quantity: number
-  min_stock_level: number
-  is_active: boolean
+  min_stock_level: number | null
+  is_active: boolean | null
   barcode: string | null
   categories: { id: string; name: string } | null
   stores: { id: string; name: string } | null
@@ -90,10 +90,10 @@ export function ProductsTable({ products }: ProductsTableProps) {
     setDeleteDialogOpen(true)
   }
 
-  const getStockStatus = (quantity: number, minLevel: number) => {
+  const getStockStatus = (quantity: number, minLevel: number | null) => {
     if (quantity === 0) {
       return <Badge variant="destructive">Out of Stock</Badge>
-    } else if (quantity <= minLevel) {
+    } else if (minLevel !== null && quantity <= minLevel) {
       return <Badge variant="outline" className="border-orange-500 text-orange-500">Low Stock</Badge>
     }
     return <Badge variant="outline" className="border-green-500 text-green-500">In Stock</Badge>
@@ -170,7 +170,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => handleToggleStatus(product.id, product.is_active)}
+                        onClick={() => handleToggleStatus(product.id, product.is_active ?? false)}
                         disabled={isPending}
                       >
                         {product.is_active ? 'Deactivate' : 'Activate'}

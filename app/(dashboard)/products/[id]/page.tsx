@@ -42,7 +42,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const getStockStatus = () => {
     if (product.quantity === 0) {
       return <Badge variant="destructive">Out of Stock</Badge>
-    } else if (product.quantity <= product.min_stock_level) {
+    } else if (product.min_stock_level && product.quantity <= product.min_stock_level) {
       return (
         <Badge variant="outline" className="border-orange-500 text-orange-500">
           Low Stock
