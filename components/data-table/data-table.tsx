@@ -117,12 +117,12 @@ export function DataTable<TData, TValue>({
       {toolbar && <DataTableToolbar table={table} config={toolbar} />}
       <div className="rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/50">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
+                    <TableHead key={header.id} colSpan={header.colSpan} className="font-semibold">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
