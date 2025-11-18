@@ -143,38 +143,34 @@ export function ProductsDataTable({
       enableHiding: false,
     },
     {
-      accessorKey: "image_url",
-      header: "Image",
+      accessorKey: "name",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Product" />
+      ),
       cell: ({ row }) => {
-        const imageUrl = row.getValue("image_url") as string | null;
+        const imageUrl = row.original.image_url;
+        const name = row.getValue("name") as string;
         return (
-          <div className="relative h-10 w-10 overflow-hidden rounded-md border">
-            {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt={row.getValue("name") || "Product"}
-                fill
-                className="object-cover"
-                sizes="40px"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-muted text-xs text-muted-foreground">
-                No image
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md border">
+              {imageUrl ? (
+                <Image
+                  src={imageUrl}
+                  alt={name || "Product"}
+                  fill
+                  className="object-cover"
+                  sizes="40px"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-muted text-xs text-muted-foreground">
+                  N/A
+                </div>
+              )}
+            </div>
+            <span className="font-medium">{name}</span>
           </div>
         );
       },
-      enableSorting: false,
-    },
-    {
-      accessorKey: "name",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Name" />
-      ),
-      cell: ({ row }) => (
-        <span className="font-medium">{row.getValue("name")}</span>
-      ),
     },
     {
       accessorKey: "sku",
