@@ -15,6 +15,7 @@ interface Product {
   min_stock_level: number | null;
   is_active: boolean | null;
   barcode: string | null;
+  image_url: string | null;
   categories: { id: string; name: string } | null;
   stores: { id: string; name: string } | null;
 }

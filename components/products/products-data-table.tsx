@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, Pencil, Trash2, Eye, CheckCircle2, XCircle } from "lucide-react";
@@ -42,6 +43,7 @@ interface Product {
   min_stock_level: number | null;
   is_active: boolean | null;
   barcode: string | null;
+  image_url: string | null;
   categories: { id: string; name: string } | null;
   stores: { id: string; name: string } | null;
 }
@@ -139,6 +141,31 @@ export function ProductsDataTable({
       ),
       enableSorting: false,
       enableHiding: false,
+    },
+    {
+      accessorKey: "image_url",
+      header: "Image",
+      cell: ({ row }) => {
+        const imageUrl = row.getValue("image_url") as string | null;
+        return (
+          <div className="relative h-10 w-10 overflow-hidden rounded-md border">
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={row.getValue("name") || "Product"}
+                fill
+                className="object-cover"
+                sizes="40px"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-muted text-xs text-muted-foreground">
+                No image
+              </div>
+            )}
+          </div>
+        );
+      },
+      enableSorting: false,
     },
     {
       accessorKey: "name",
