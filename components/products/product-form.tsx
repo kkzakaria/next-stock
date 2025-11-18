@@ -61,7 +61,7 @@ export function ProductForm({
           sku: initialData.sku,
           name: initialData.name,
           description: initialData.description || '',
-          category_id: initialData.category_id || '',
+          category_id: initialData.category_id || 'uncategorized',
           price: initialData.price?.toString() || '0',
           cost: initialData.cost?.toString() || '',
           quantity: initialData.quantity?.toString() || '0',
@@ -75,7 +75,7 @@ export function ProductForm({
           sku: '',
           name: '',
           description: '',
-          category_id: '',
+          category_id: 'uncategorized',
           price: '0',
           cost: '',
           quantity: '0',
@@ -95,7 +95,7 @@ export function ProductForm({
           cost: value.cost ? parseFloat(value.cost) : undefined,
           quantity: parseInt(value.quantity, 10),
           min_stock_level: parseInt(value.min_stock_level, 10),
-          category_id: value.category_id || null,
+          category_id: value.category_id === 'uncategorized' ? null : value.category_id || null,
         }
 
         const result = isEditing
@@ -232,7 +232,7 @@ export function ProductForm({
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Uncategorized</SelectItem>
+                      <SelectItem value="uncategorized">Uncategorized</SelectItem>
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
