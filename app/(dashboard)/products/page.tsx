@@ -21,22 +21,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   } = await supabase.auth.getUser()
 
   // Get user profile to check role
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from('profiles')
     .select('role, store_id')
     .eq('id', user!.id)
     .single()
 
-  console.log('=== PRODUCTS PAGE DEBUG ===')
-  console.log('User ID:', user!.id)
-  console.log('Profile data:', profile)
-  console.log('Profile error:', profileError)
-  console.log('Role check result:', ['admin', 'manager'].includes(profile?.role || ''))
-  console.log('========================')
-
   // Only admin and manager can access products
   if (!['admin', 'manager'].includes(profile?.role || '')) {
-    console.log('REDIRECTING TO DASHBOARD - Role:', profile?.role)
     redirect('/dashboard')
   }
 

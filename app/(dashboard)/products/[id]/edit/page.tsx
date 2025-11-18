@@ -16,6 +16,9 @@ interface EditProductPageProps {
 }
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
+  // Next.js 16: params is now a Promise and must be awaited
+  const resolvedParams = await params
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -32,7 +35,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
   }
 
   // Fetch product
-  const productResult = await getProduct(params.id)
+  const productResult = await getProduct(resolvedParams.id)
   if (!productResult.success || !productResult.data) {
     notFound()
   }

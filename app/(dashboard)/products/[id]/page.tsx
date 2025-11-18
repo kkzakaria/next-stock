@@ -20,6 +20,9 @@ interface ProductDetailPageProps {
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+  // Next.js 16: params is now a Promise and must be awaited
+  const resolvedParams = await params
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -36,7 +39,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   }
 
   // Fetch product
-  const productResult = await getProduct(params.id)
+  const productResult = await getProduct(resolvedParams.id)
   if (!productResult.success || !productResult.data) {
     notFound()
   }
@@ -82,7 +85,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <Badge variant="secondary">Inactive</Badge>
             )}
             <Button asChild>
-              <Link href={`/products/${product.id}/edit`}>
+              <Link href={`/products/${resolvedParams.id}/edit`}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
               </Link>

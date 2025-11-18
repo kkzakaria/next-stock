@@ -359,23 +359,12 @@ export async function getProduct(id: string) {
       return { success: false, error: 'Profile not found', data: null }
     }
 
-    // Debug logging
-    console.log('=== GET PRODUCT DEBUG ===')
-    console.log('Product ID:', id)
-    console.log('User role:', profile.role)
-    console.log('User store_id:', profile.store_id)
-
     // First get the product
     const { data: product, error } = await supabase
       .from('products')
       .select('*')
       .eq('id', id)
       .single()
-
-    console.log('Product data:', product)
-    console.log('Error:', error)
-    console.log('Error details:', JSON.stringify(error, null, 2))
-    console.log('========================')
 
     if (error) {
       console.error('Error fetching product:', error)
