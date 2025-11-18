@@ -141,21 +141,21 @@ export function ProductsDataTable({
       enableHiding: false,
     },
     {
-      accessorKey: "sku",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="SKU" />
-      ),
-      cell: ({ row }) => (
-        <span className="font-mono text-sm">{row.getValue("sku")}</span>
-      ),
-    },
-    {
       accessorKey: "name",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Name" />
       ),
       cell: ({ row }) => (
         <span className="font-medium">{row.getValue("name")}</span>
+      ),
+    },
+    {
+      accessorKey: "sku",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="SKU" />
+      ),
+      cell: ({ row }) => (
+        <span className="font-mono text-sm">{row.getValue("sku")}</span>
       ),
     },
     {
