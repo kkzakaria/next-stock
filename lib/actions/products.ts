@@ -359,25 +359,31 @@ export async function getProduct(id: string) {
       return { success: false, error: 'Profile not found', data: null }
     }
 
+    // Debug logging
+    console.log('=== GET PRODUCT DEBUG ===')
+    console.log('Product ID:', id)
+    console.log('User role:', profile.role)
+    console.log('User store_id:', profile.store_id)
+
+    // First get the product
     const { data: product, error } = await supabase
       .from('products')
-      .select(`
-        *,
-        categories (
-          id,
-          name
-        ),
-        stores (
-          id,
-          name
-        )
-      `)
+      .select('*')
       .eq('id', id)
       .single()
 
+    console.log('Product data:', product)
+    console.log('Error:', error)
+    console.log('Error details:', JSON.stringify(error, null, 2))
+    console.log('========================')
+
     if (error) {
       console.error('Error fetching product:', error)
-      return { success: false, error: error.message, data: null }
+      return { success: false, error: error.message || error.toString() || 'Product not found', data: null }
+    }
+
+    if (!product) {
+      return { success: false, error: 'Product not found', data: null }
     }
 
     // Verify access based on role
@@ -385,7 +391,36 @@ export async function getProduct(id: string) {
       return { success: false, error: 'Insufficient permissions', data: null }
     }
 
-    return { success: true, data: product }
+    // Fetch category separately if it exists
+    let category = null
+    if (product.category_id) {
+      const { data: categoryData } = await supabase
+        .from('categories')
+        .select('id, name')
+        .eq('id', product.category_id)
+        .single()
+      category = categoryData
+    }
+
+    // Fetch store separately if it exists
+    let store = null
+    if (product.store_id) {
+      const { data: storeData } = await supabase
+        .from('stores')
+        .select('id, name')
+        .eq('id', product.store_id)
+        .single()
+      store = storeData
+    }
+
+    // Combine the data
+    const productWithRelations = {
+      ...product,
+      categories: category,
+      stores: store
+    }
+
+    return { success: true, data: productWithRelations }
   } catch (error) {
     console.error('Get product error:', error)
     return { success: false, error: 'Failed to fetch product', data: null }
@@ -476,5 +511,195 @@ export async function getStores() {
   } catch (error) {
     console.error('Get stores error:', error)
     return { success: false, error: 'Failed to fetch stores', data: [] }
+  }
+}
+
+/**
+ * Adjust product quantity with reason
+ * Creates a stock movement of type 'adjustment'
+ */
+export async function adjustQuantity(
+  productId: string,
+  adjustment: number,
+  reason: string
+): Promise<ActionResult> {
+  try {
+    const supabase = await createClient()
+
+    // Verify user has permission
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return { success: false, error: 'Not authenticated' }
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, store_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile) {
+      return { success: false, error: 'Profile not found' }
+    }
+
+    // Get current product
+    const { data: product } = await supabase
+      .from('products')
+      .select('quantity, store_id')
+      .eq('id', productId)
+      .single()
+
+    if (!product) {
+      return { success: false, error: 'Product not found' }
+    }
+
+    // Verify access
+    if (profile.role !== 'admin' && product.store_id !== profile.store_id) {
+      return { success: false, error: 'Access denied to this product' }
+    }
+
+    const newQuantity = product.quantity + adjustment
+
+    // Validate new quantity
+    if (newQuantity < 0) {
+      return { success: false, error: 'Quantity cannot be negative' }
+    }
+
+    // Update product quantity (this will trigger automatic stock movement creation)
+    // But we'll also create a manual one with our reason
+    const { error: updateError } = await supabase
+      .from('products')
+      .update({ quantity: newQuantity })
+      .eq('id', productId)
+
+    if (updateError) {
+      console.error('Error adjusting quantity:', updateError)
+      return { success: false, error: updateError.message }
+    }
+
+    // Create stock movement with custom reason
+    const { error: movementError } = await supabase
+      .from('stock_movements')
+      .insert({
+        product_id: productId,
+        store_id: product.store_id!,
+        user_id: user.id,
+        type: 'adjustment' as const,
+        quantity: adjustment,
+        previous_quantity: product.quantity,
+        new_quantity: newQuantity,
+        notes: reason || null,
+      })
+
+    if (movementError) {
+      console.error('Error creating stock movement:', movementError)
+      // Don't fail the operation if movement creation fails
+    }
+
+    revalidatePath(`/products/${productId}`)
+    revalidatePath('/products')
+
+    return { success: true, data: { newQuantity } }
+  } catch (error) {
+    console.error('Adjust quantity error:', error)
+    return { success: false, error: 'Failed to adjust quantity' }
+  }
+}
+
+/**
+ * Duplicate a product with a new SKU
+ */
+export async function duplicateProduct(productId: string): Promise<ActionResult> {
+  try {
+    const supabase = await createClient()
+
+    // Verify user has permission
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return { success: false, error: 'Not authenticated' }
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, store_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || !['admin', 'manager'].includes(profile.role)) {
+      return { success: false, error: 'Insufficient permissions' }
+    }
+
+    // Get original product
+    const { data: original, error: fetchError } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', productId)
+      .single()
+
+    if (fetchError || !original) {
+      return { success: false, error: 'Product not found' }
+    }
+
+    // Verify access
+    if (profile.role === 'manager' && original.store_id !== profile.store_id) {
+      return { success: false, error: 'Access denied to this product' }
+    }
+
+    // Generate new SKU by appending -COPY and a number if needed
+    let newSku = `${original.sku}-COPY`
+    let counter = 1
+
+    // Check if SKU exists and increment until we find a unique one
+    while (true) {
+      const { data: existing } = await supabase
+        .from('products')
+        .select('id')
+        .eq('sku', newSku)
+        .maybeSingle()
+
+      if (!existing) {
+        break
+      }
+
+      counter++
+      newSku = `${original.sku}-COPY${counter}`
+    }
+
+    // Create duplicate product
+    const duplicateData = {
+      sku: newSku,
+      name: `${original.name} (Copy)`,
+      description: original.description,
+      category_id: original.category_id,
+      price: original.price,
+      cost: original.cost,
+      quantity: 0, // Start with 0 quantity for safety
+      min_stock_level: original.min_stock_level,
+      store_id: original.store_id,
+      image_url: original.image_url,
+      barcode: null, // Don't copy barcode as it should be unique
+      is_active: false, // Start as inactive for review
+    }
+
+    const { data: duplicate, error: createError } = await supabase
+      .from('products')
+      .insert(duplicateData)
+      .select()
+      .single()
+
+    if (createError) {
+      console.error('Error duplicating product:', createError)
+      return { success: false, error: createError.message }
+    }
+
+    revalidatePath('/products')
+
+    return {
+      success: true,
+      data: duplicate
+    }
+  } catch (error) {
+    console.error('Duplicate product error:', error)
+    return { success: false, error: 'Failed to duplicate product' }
   }
 }

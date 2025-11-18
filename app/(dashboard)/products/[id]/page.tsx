@@ -4,8 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import { ChevronLeft, Pencil, Package } from 'lucide-react'
 import { getProduct } from '@/lib/actions/products'
+import { QuickActions } from '@/components/products/quick-actions'
+import { ProductStatsComponent } from '@/components/products/product-stats'
+import { StockMovementsHistory } from '@/components/products/stock-movements-history'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,31 +62,45 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/products">
-              <ChevronLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">{product.name}</h2>
-            <p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/products">
+                <ChevronLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight">{product.name}</h2>
+              <p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {product.is_active ? (
+              <Badge variant="default">Active</Badge>
+            ) : (
+              <Badge variant="secondary">Inactive</Badge>
+            )}
+            <Button asChild>
+              <Link href={`/products/${product.id}/edit`}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </Button>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {product.is_active ? (
-            <Badge variant="default">Active</Badge>
-          ) : (
-            <Badge variant="secondary">Inactive</Badge>
-          )}
-          <Button asChild>
-            <Link href={`/products/${product.id}/edit`}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </Link>
-          </Button>
+
+        {/* Quick Actions */}
+        <div>
+          <p className="mb-2 text-sm font-medium text-muted-foreground">Quick Actions</p>
+          <QuickActions
+            productId={product.id}
+            currentQuantity={product.quantity}
+            isActive={product.is_active ?? true}
+          />
         </div>
+
+        <Separator />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -207,6 +225,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           </Card>
         </div>
       </div>
+
+      {/* Product Statistics */}
+      <ProductStatsComponent productId={product.id} price={product.price} />
+
+      {/* Stock Movement History */}
+      <StockMovementsHistory productId={product.id} />
     </div>
   )
 }
