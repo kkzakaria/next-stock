@@ -85,6 +85,9 @@ export function DataTable<TData, TValue>({
     manualPagination,
   });
 
+  // Track initial mount to avoid calling onPaginationChange on first render
+  const isInitialMount = React.useRef(true);
+
   // Notify parent of selection changes
   React.useEffect(() => {
     if (onRowSelectionChange) {
@@ -97,6 +100,12 @@ export function DataTable<TData, TValue>({
 
   // Notify parent of pagination changes (for server-side pagination)
   React.useEffect(() => {
+    // Skip the initial render to avoid infinite loop
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
     if (manualPagination && onPaginationChange) {
       onPaginationChange(pagination.pageIndex, pagination.pageSize);
     }
