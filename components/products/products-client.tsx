@@ -22,14 +22,12 @@ interface Product {
 interface ProductsClientProps {
   products: Product[];
   pageCount: number;
-  currentPage: number;
   pageSize: number;
 }
 
 export function ProductsClient({
   products,
   pageCount,
-  currentPage,
   pageSize,
 }: ProductsClientProps) {
   const router = useRouter();

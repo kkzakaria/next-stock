@@ -72,7 +72,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <ProductsClient
         products={productsResult.data || []}
         pageCount={pageCount}
-        currentPage={page}
         pageSize={limit}
       />
     </div>
