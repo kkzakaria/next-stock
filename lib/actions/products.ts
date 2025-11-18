@@ -230,15 +230,29 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
 }
 
 /**
- * Get all products for the current user's store(s)
+ * Product filters interface
  */
-export async function getProducts(storeId?: string) {
+interface ProductFilters {
+  search?: string | null
+  category?: string | null
+  status?: 'active' | 'inactive' | null
+  store?: string | null
+  sortBy?: 'name' | 'sku' | 'price' | 'quantity' | 'created_at' | null
+  sortOrder?: 'asc' | 'desc'
+  page?: number
+  limit?: number
+}
+
+/**
+ * Get all products for the current user's store(s) with filtering, sorting, and pagination
+ */
+export async function getProducts(filters: ProductFilters = {}) {
   try {
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      return { success: false, error: 'Not authenticated', data: [] }
+      return { success: false, error: 'Not authenticated', data: [], totalCount: 0 }
     }
 
     const { data: profile } = await supabase
@@ -248,10 +262,10 @@ export async function getProducts(storeId?: string) {
       .single()
 
     if (!profile) {
-      return { success: false, error: 'Profile not found', data: [] }
+      return { success: false, error: 'Profile not found', data: [], totalCount: 0 }
     }
 
-    // Build query based on role and store filter
+    // Build query based on role and filters
     let query = supabase
       .from('products')
       .select(`
@@ -264,27 +278,62 @@ export async function getProducts(storeId?: string) {
           id,
           name
         )
-      `)
-      .order('created_at', { ascending: false })
+      `, { count: 'exact' })
 
-    // Apply store filter based on role
+    // Apply role-based store filter
     if (profile.role !== 'admin' && profile.store_id) {
       query = query.eq('store_id', profile.store_id)
-    } else if (storeId) {
-      query = query.eq('store_id', storeId)
     }
 
-    const { data: products, error } = await query
+    // Apply search filter (name or SKU)
+    if (filters.search) {
+      query = query.or(`name.ilike.%${filters.search}%,sku.ilike.%${filters.search}%`)
+    }
+
+    // Apply category filter
+    if (filters.category) {
+      query = query.eq('category_id', filters.category)
+    }
+
+    // Apply status filter
+    if (filters.status === 'active') {
+      query = query.eq('is_active', true)
+    } else if (filters.status === 'inactive') {
+      query = query.eq('is_active', false)
+    }
+
+    // Apply store filter (for admins)
+    if (filters.store && profile.role === 'admin') {
+      query = query.eq('store_id', filters.store)
+    }
+
+    // Apply sorting
+    const sortBy = filters.sortBy || 'created_at'
+    const sortOrder = filters.sortOrder || 'asc'
+    query = query.order(sortBy, { ascending: sortOrder === 'asc' })
+
+    // Apply pagination
+    const page = filters.page || 1
+    const limit = filters.limit || 10
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+    query = query.range(from, to)
+
+    const { data: products, error, count } = await query
 
     if (error) {
       console.error('Error fetching products:', error)
-      return { success: false, error: error.message, data: [] }
+      return { success: false, error: error.message, data: [], totalCount: 0 }
     }
 
-    return { success: true, data: products || [] }
+    return {
+      success: true,
+      data: products || [],
+      totalCount: count || 0
+    }
   } catch (error) {
     console.error('Get products error:', error)
-    return { success: false, error: 'Failed to fetch products', data: [] }
+    return { success: false, error: 'Failed to fetch products', data: [], totalCount: 0 }
   }
 }
 
@@ -358,4 +407,74 @@ export async function updateProductQuantity(
   newQuantity: number
 ): Promise<ActionResult> {
   return updateProduct(id, { quantity: newQuantity })
+}
+
+/**
+ * Get all categories
+ */
+export async function getCategories() {
+  try {
+    const supabase = await createClient()
+
+    const { data: categories, error } = await supabase
+      .from('categories')
+      .select('id, name')
+      .order('name')
+
+    if (error) {
+      console.error('Error fetching categories:', error)
+      return { success: false, error: error.message, data: [] }
+    }
+
+    return { success: true, data: categories || [] }
+  } catch (error) {
+    console.error('Get categories error:', error)
+    return { success: false, error: 'Failed to fetch categories', data: [] }
+  }
+}
+
+/**
+ * Get all stores (admin) or current user's store (manager/cashier)
+ */
+export async function getStores() {
+  try {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return { success: false, error: 'Not authenticated', data: [] }
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, store_id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile) {
+      return { success: false, error: 'Profile not found', data: [] }
+    }
+
+    let query = supabase
+      .from('stores')
+      .select('id, name')
+      .order('name')
+
+    // Non-admins only see their assigned store
+    if (profile.role !== 'admin' && profile.store_id) {
+      query = query.eq('id', profile.store_id)
+    }
+
+    const { data: stores, error } = await query
+
+    if (error) {
+      console.error('Error fetching stores:', error)
+      return { success: false, error: error.message, data: [] }
+    }
+
+    return { success: true, data: stores || [] }
+  } catch (error) {
+    console.error('Get stores error:', error)
+    return { success: false, error: 'Failed to fetch stores', data: [] }
+  }
 }
