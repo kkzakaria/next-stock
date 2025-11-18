@@ -40,6 +40,9 @@ export function DataTable<TData, TValue>({
   emptyMessage = "No results.",
   getRowId,
   onRowSelectionChange,
+  manualPagination = false,
+  pageCount,
+  onPaginationChange,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -48,21 +51,28 @@ export function DataTable<TData, TValue>({
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize,
+  });
 
   const table = useReactTable({
     data,
     columns,
+    pageCount: pageCount ?? -1,
     state: {
       sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
+      pagination,
     },
     enableRowSelection,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: enablePagination
@@ -72,11 +82,7 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getRowId,
-    initialState: {
-      pagination: {
-        pageSize,
-      },
-    },
+    manualPagination,
   });
 
   // Notify parent of selection changes
@@ -88,6 +94,13 @@ export function DataTable<TData, TValue>({
       onRowSelectionChange(selectedRows);
     }
   }, [rowSelection, onRowSelectionChange, table]);
+
+  // Notify parent of pagination changes (for server-side pagination)
+  React.useEffect(() => {
+    if (manualPagination && onPaginationChange) {
+      onPaginationChange(pagination.pageIndex, pagination.pageSize);
+    }
+  }, [pagination, manualPagination, onPaginationChange]);
 
   return (
     <div className="space-y-4">

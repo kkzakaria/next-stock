@@ -48,6 +48,11 @@ export interface DataTableProps<TData, TValue> {
   pageSizeOptions?: number[];
   enablePagination?: boolean;
 
+  // Server-side pagination
+  manualPagination?: boolean;
+  pageCount?: number;
+  onPaginationChange?: (pageIndex: number, pageSize: number) => void;
+
   // Selection
   enableRowSelection?: boolean;
   onRowSelectionChange?: (selectedRows: TData[]) => void;

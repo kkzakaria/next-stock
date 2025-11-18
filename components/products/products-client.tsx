@@ -1,7 +1,8 @@
 'use client';
 
 import { ProductsDataTable } from './products-data-table';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback } from 'react';
 
 interface Product {
   id: string;
@@ -20,16 +21,48 @@ interface Product {
 
 interface ProductsClientProps {
   products: Product[];
+  pageCount: number;
+  currentPage: number;
+  pageSize: number;
 }
 
-export function ProductsClient({ products }: ProductsClientProps) {
+export function ProductsClient({
+  products,
+  pageCount,
+  currentPage,
+  pageSize,
+}: ProductsClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleAddProduct = () => {
     router.push('/products/new');
   };
 
+  const handlePaginationChange = useCallback(
+    (pageIndex: number, newPageSize: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      // Update page (TanStack uses 0-based index, convert to 1-based for URL)
+      params.set('page', String(pageIndex + 1));
+
+      // Update limit if it changed
+      if (newPageSize !== pageSize) {
+        params.set('limit', String(newPageSize));
+      }
+
+      router.push(`/products?${params.toString()}`);
+    },
+    [router, searchParams, pageSize]
+  );
+
   return (
-    <ProductsDataTable products={products} onAddProduct={handleAddProduct} />
+    <ProductsDataTable
+      products={products}
+      onAddProduct={handleAddProduct}
+      pageCount={pageCount}
+      pageSize={pageSize}
+      onPaginationChange={handlePaginationChange}
+    />
   );
 }

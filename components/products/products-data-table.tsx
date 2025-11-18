@@ -49,9 +49,19 @@ interface Product {
 interface ProductsDataTableProps {
   products: Product[];
   onAddProduct?: () => void;
+  pageCount?: number;
+  currentPage?: number;
+  pageSize?: number;
+  onPaginationChange?: (pageIndex: number, pageSize: number) => void;
 }
 
-export function ProductsDataTable({ products, onAddProduct }: ProductsDataTableProps) {
+export function ProductsDataTable({
+  products,
+  onAddProduct,
+  pageCount,
+  pageSize,
+  onPaginationChange,
+}: ProductsDataTableProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -328,9 +338,12 @@ export function ProductsDataTable({ products, onAddProduct }: ProductsDataTableP
           enableExport: true,
           onImport: handleImport,
         }}
-        pageSize={10}
+        pageSize={pageSize || 10}
         pageSizeOptions={[10, 20, 50, 100]}
         emptyMessage="No products found. Add your first product to get started."
+        manualPagination={!!pageCount}
+        pageCount={pageCount}
+        onPaginationChange={onPaginationChange}
       />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
