@@ -6,8 +6,8 @@ import { Download, Plus, Upload, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DataTableViewOptions } from "./data-table-view-options";
-import { DataTableFacetedFilter } from "./data-table-faceted-filter";
+import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
+import { DataTableFacetedFilter } from "@/components/data-table/data-table-faceted-filter";
 import type { DataTableToolbarConfig } from "@/types/data-table";
 import { exportToCSV, exportToExcel } from "@/lib/utils/export-utils";
 import { parseCSV, parseExcel } from "@/lib/utils/import-utils";

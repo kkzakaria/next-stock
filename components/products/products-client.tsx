@@ -1,9 +1,8 @@
 'use client';
 
-import { ProductsTable } from './products-table';
+import { ProductsDataTable } from './products-data-table';
 import { ProductsFilters } from './products-filters';
-import { ProductsPagination } from './products-pagination';
-import { useProductFilters } from '@/lib/hooks/use-product-filters';
+import { useRouter } from 'next/navigation';
 
 interface Product {
   id: string;
@@ -41,32 +40,23 @@ export function ProductsClient({
   products,
   categories,
   stores,
-  totalCount,
 }: ProductsClientProps) {
-  const { filters } = useProductFilters();
+  const router = useRouter();
 
-  const totalPages = Math.ceil(totalCount / filters.limit);
+  const handleAddProduct = () => {
+    router.push('/products/new');
+  };
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
+      {/* Filters - Keep for server-side filtering */}
       <ProductsFilters categories={categories} stores={stores} />
 
-      {/* Results Count */}
-      <div className="text-sm text-muted-foreground">
-        Showing {products.length} of {totalCount} products
-      </div>
-
-      {/* Products Table */}
-      <ProductsTable products={products} />
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <ProductsPagination
-          currentPage={filters.page}
-          totalPages={totalPages}
-        />
-      )}
+      {/* Products DataTable with client-side features */}
+      <ProductsDataTable
+        products={products}
+        onAddProduct={handleAddProduct}
+      />
     </div>
   );
 }
