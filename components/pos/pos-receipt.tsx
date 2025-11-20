@@ -163,27 +163,16 @@ export function POSReceipt({ open, onOpenChange, saleId, saleNumber }: ReceiptPr
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto print:max-w-full">
-        <DialogHeader className="print:hidden">
-          <DialogTitle>Sale Receipt</DialogTitle>
-          <DialogDescription>Receipt #{saleNumber}</DialogDescription>
+        <DialogHeader>
+          <DialogTitle className="print:hidden">Sale Receipt</DialogTitle>
+          <DialogDescription className="print:hidden">Receipt #{saleNumber}</DialogDescription>
         </DialogHeader>
-
-        {/* Print-only header */}
-        <div className="hidden print:block text-center mb-6">
-          <h1 className="text-2xl font-bold">{saleData.store.name}</h1>
-          {saleData.store.address && (
-            <p className="text-sm text-gray-600">{saleData.store.address}</p>
-          )}
-          {saleData.store.phone && (
-            <p className="text-sm text-gray-600">{saleData.store.phone}</p>
-          )}
-        </div>
 
         {/* Receipt Content */}
         <div id="receipt-content" className="print:p-8">
-          {/* Store Info - Screen only */}
-          <div className="text-center mb-6 print:hidden">
-            <h2 className="text-xl font-bold">{saleData.store.name}</h2>
+          {/* Store Info */}
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-bold print:text-2xl">{saleData.store.name}</h2>
             {saleData.store.address && (
               <p className="text-sm text-gray-600">{saleData.store.address}</p>
             )}
