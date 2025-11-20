@@ -109,6 +109,14 @@ export function POSReceipt({ open, onOpenChange, saleId, saleNumber }: ReceiptPr
   }
 
   const handlePrint = () => {
+    // Copy receipt content to print div
+    const receiptContent = document.getElementById('receipt-content')
+    const printDiv = document.getElementById('print-only-receipt')
+
+    if (receiptContent && printDiv) {
+      printDiv.innerHTML = receiptContent.innerHTML
+    }
+
     window.print()
   }
 
@@ -137,6 +145,9 @@ export function POSReceipt({ open, onOpenChange, saleId, saleNumber }: ReceiptPr
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Loading Receipt</DialogTitle>
+          </DialogHeader>
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
@@ -149,6 +160,9 @@ export function POSReceipt({ open, onOpenChange, saleId, saleNumber }: ReceiptPr
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Error</DialogTitle>
+          </DialogHeader>
           <div className="text-center py-8">
             <p className="text-red-600">{error || 'Receipt not found'}</p>
             <Button onClick={() => onOpenChange(false)} className="mt-4">
@@ -161,6 +175,7 @@ export function POSReceipt({ open, onOpenChange, saleId, saleNumber }: ReceiptPr
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto print:max-w-full">
         <DialogHeader>
@@ -282,5 +297,9 @@ export function POSReceipt({ open, onOpenChange, saleId, saleNumber }: ReceiptPr
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Hidden print-only div */}
+    <div id="print-only-receipt" className="hidden print:block print:p-8" />
+  </>
   )
 }

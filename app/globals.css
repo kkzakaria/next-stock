@@ -127,33 +127,31 @@
 
 /* Print styles for receipts */
 @media print {
-  /* Hide everything except receipt content */
-  body * {
-    visibility: hidden;
-  }
-
-  #receipt-content,
-  #receipt-content * {
-    visibility: visible;
-  }
-
   /* Reset print page */
   @page {
     size: auto;
     margin: 15mm;
   }
 
+  /* Reset body for printing */
+  html,
   body {
     overflow: visible !important;
     height: auto !important;
   }
 
-  /* Position receipt content */
-  #receipt-content {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+  /* Hide everything except the print div */
+  body > * {
+    display: none !important;
+  }
+
+  /* Show only the print-only receipt */
+  #print-only-receipt {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 20px !important;
   }
 
   /* Ensure proper page breaks */
