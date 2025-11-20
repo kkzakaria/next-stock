@@ -18,6 +18,7 @@ interface Product {
   name: string
   price: number
   barcode: string | null
+  imageUrl: string | null
   category: { id: string; name: string } | null
   inventoryId: string
   quantity: number

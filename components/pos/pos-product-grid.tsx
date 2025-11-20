@@ -5,7 +5,7 @@
  * Displays products in a grid with search functionality
  */
 
-import { useState } from 'react'
+import Image from 'next/image'
 import { useCartStore } from '@/lib/store/cart-store'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ interface Product {
   name: string
   price: number
   barcode: string | null
+  imageUrl: string | null
   category: { id: string; name: string } | null
   inventoryId: string
   quantity: number
@@ -91,6 +92,21 @@ export function POSProductGrid({
                 className="cursor-pointer transition-all hover:shadow-md overflow-hidden"
                 onClick={() => handleAddToCart(product)}
               >
+                {/* Product Image */}
+                <div className="relative h-32 w-full bg-gray-100 flex items-center justify-center">
+                  {product.imageUrl ? (
+                    <Image
+                      src={product.imageUrl}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    />
+                  ) : (
+                    <Package className="h-12 w-12 text-gray-300" />
+                  )}
+                </div>
+
                 <div className="p-3">
                   {/* Product Name */}
                   <h3 className="font-medium text-sm line-clamp-2 mb-1">

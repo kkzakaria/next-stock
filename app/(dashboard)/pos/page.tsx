@@ -56,6 +56,7 @@ export default async function POSPage() {
       name,
       price,
       barcode,
+      image_url,
       category:categories(id, name),
       inventory:product_inventory!product_inventory_product_id_fkey(
         id,
@@ -95,6 +96,7 @@ export default async function POSPage() {
         name: product.name,
         price: Number(product.price),
         barcode: product.barcode || '',
+        imageUrl: product.image_url || null,
         category: product.category,
         inventoryId: storeInventory.id,
         quantity: storeInventory.quantity,
