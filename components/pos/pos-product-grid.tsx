@@ -89,7 +89,7 @@ export function POSProductGrid({
             {products.map((product) => (
               <Card
                 key={product.id}
-                className="cursor-pointer transition-all hover:shadow-md overflow-hidden p-0"
+                className="cursor-pointer transition-all hover:shadow-md overflow-hidden !p-0"
                 onClick={() => handleAddToCart(product)}
               >
                 {/* Product Image */}
