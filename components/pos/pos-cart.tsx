@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react'
 import { POSCheckoutModal } from './pos-checkout-modal'
+import { POSReceipt } from './pos-receipt'
 import { toast } from 'sonner'
 
 interface POSCartProps {
@@ -30,6 +31,9 @@ export function POSCart({ storeId, cashierId, cashierName }: POSCartProps) {
   const getTotal = useCartStore((state) => state.getTotal)
 
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [receiptOpen, setReceiptOpen] = useState(false)
+  const [currentSaleId, setCurrentSaleId] = useState<string>('')
+  const [currentSaleNumber, setCurrentSaleNumber] = useState<string>('')
   const cartItemsRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to bottom when new item is added
@@ -43,9 +47,17 @@ export function POSCart({ storeId, cashierId, cashierName }: POSCartProps) {
   const tax = getTax()
   const total = getTotal()
 
-  const handleCheckoutComplete = (saleId: string) => {
+  const handleCheckoutComplete = (saleId: string, saleNumber: string) => {
+    // Close checkout modal
+    setCheckoutOpen(false)
+
+    // Show receipt
+    setCurrentSaleId(saleId)
+    setCurrentSaleNumber(saleNumber)
+    setReceiptOpen(true)
+
     toast.success('Sale completed successfully', {
-      description: `Sale ID: ${saleId}`,
+      description: `Receipt #${saleNumber}`,
     })
   }
 
@@ -172,6 +184,14 @@ export function POSCart({ storeId, cashierId, cashierName }: POSCartProps) {
         storeId={storeId}
         cashierId={cashierId}
         onCheckoutComplete={handleCheckoutComplete}
+      />
+
+      {/* Receipt Modal */}
+      <POSReceipt
+        open={receiptOpen}
+        onOpenChange={setReceiptOpen}
+        saleId={currentSaleId}
+        saleNumber={currentSaleNumber}
       />
     </div>
   )

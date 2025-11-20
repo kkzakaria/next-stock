@@ -124,3 +124,44 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Print styles for receipts */
+@media print {
+  /* Hide everything except receipt content */
+  body * {
+    visibility: hidden;
+  }
+
+  #receipt-content,
+  #receipt-content * {
+    visibility: visible;
+  }
+
+  /* Reset print page */
+  @page {
+    size: auto;
+    margin: 15mm;
+  }
+
+  body {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Position receipt content */
+  #receipt-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Ensure proper page breaks */
+  table {
+    page-break-inside: avoid;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+}
