@@ -60,11 +60,8 @@ export function POSClient({
       {/* Left side: Product Grid */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4">
-          <div>
-            <h1 className="text-2xl font-bold">{storeName}</h1>
-            <p className="text-sm text-gray-500">{cashierName}</p>
-          </div>
+        <div className="pb-2">
+          <h1 className="text-2xl font-bold">{storeName}</h1>
         </div>
 
         {/* Product Grid */}
