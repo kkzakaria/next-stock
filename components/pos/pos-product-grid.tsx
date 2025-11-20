@@ -56,9 +56,9 @@ export function POSProductGrid({
   }
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Search Bar */}
-      <div className="pb-4">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Search Bar - Fixed */}
+      <div className="flex-shrink-0 pb-4 bg-white">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
@@ -72,8 +72,8 @@ export function POSProductGrid({
         </div>
       </div>
 
-      {/* Product Grid */}
-      <div className="flex-1 overflow-auto">
+      {/* Product Grid - Scrollable */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         {products.length === 0 ? (
           <div className="flex h-full items-center justify-center text-gray-400">
             <div className="text-center">
