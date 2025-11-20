@@ -124,7 +124,7 @@ export function POSProductGrid({
                       {formatCurrency(product.price)}
                     </span>
                     <span
-                      className={`text-xs ${
+                      className={`text-sm font-semibold ${
                         product.quantity > 10
                           ? 'text-green-600'
                           : product.quantity > 0
@@ -132,9 +132,7 @@ export function POSProductGrid({
                           : 'text-red-600'
                       }`}
                     >
-                      {product.quantity > 0
-                        ? `${product.quantity} in stock`
-                        : 'Out of stock'}
+                      {product.quantity}
                     </span>
                   </div>
 
