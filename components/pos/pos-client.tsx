@@ -89,7 +89,10 @@ export function POSClient({
       >
         <ShoppingCart className="h-6 w-6" />
         {itemCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+          <span
+            suppressHydrationWarning
+            className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
+          >
             {itemCount}
           </span>
         )}
