@@ -40,8 +40,10 @@ export function POSClient({
   cashierName,
 }: POSClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const items = useCartStore((state) => state.items)
-  const itemCount = useCartStore((state) => state.getItemCount())
+  const storeItemCount = useCartStore((state) => state.getItemCount())
+
+  // Prevent hydration mismatch: use 0 during SSR, real value on client
+  const itemCount = typeof window === 'undefined' ? 0 : storeItemCount
 
   // Filter products based on search query
   const filteredProducts = products.filter(
@@ -89,10 +91,7 @@ export function POSClient({
       >
         <ShoppingCart className="h-6 w-6" />
         {itemCount > 0 && (
-          <span
-            suppressHydrationWarning
-            className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
-          >
+          <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
             {itemCount}
           </span>
         )}
