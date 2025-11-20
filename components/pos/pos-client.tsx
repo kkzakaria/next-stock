@@ -28,7 +28,6 @@ interface Product {
 interface POSClientProps {
   products: Product[]
   storeId: string
-  storeName: string
   cashierId: string
   cashierName: string
 }
@@ -36,7 +35,6 @@ interface POSClientProps {
 export function POSClient({
   products,
   storeId,
-  storeName,
   cashierId,
   cashierName,
 }: POSClientProps) {
@@ -59,11 +57,6 @@ export function POSClient({
     <div className="flex h-full gap-4">
       {/* Left side: Product Grid */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="pb-2">
-          <h1 className="text-2xl font-bold">{storeName}</h1>
-        </div>
-
         {/* Product Grid */}
         <POSProductGrid
           products={filteredProducts}

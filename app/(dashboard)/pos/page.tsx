@@ -109,7 +109,6 @@ export default async function POSPage() {
       <POSClient
         products={productsWithInventory}
         storeId={profile.store_id}
-        storeName={profile.store?.name || 'Store'}
         cashierId={user.id}
         cashierName={profile.full_name || 'User'}
       />
