@@ -62,10 +62,8 @@ export function POSClient({
         {/* Header */}
         <div className="flex items-center justify-between pb-4">
           <div>
-            <h1 className="text-2xl font-bold">Point of Sale</h1>
-            <p className="text-sm text-gray-500">
-              {storeName} • {cashierName}
-            </p>
+            <h1 className="text-2xl font-bold">{storeName}</h1>
+            <p className="text-sm text-gray-500">{cashierName}</p>
           </div>
         </div>
 
