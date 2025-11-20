@@ -89,7 +89,7 @@ export function POSProductGrid({
             {products.map((product) => (
               <Card
                 key={product.id}
-                className="cursor-pointer transition-all hover:shadow-md overflow-hidden"
+                className="cursor-pointer transition-all hover:shadow-md overflow-hidden p-0"
                 onClick={() => handleAddToCart(product)}
               >
                 {/* Product Image */}
@@ -107,19 +107,19 @@ export function POSProductGrid({
                   )}
                 </div>
 
-                <div className="p-3">
+                <div className="p-2 pt-1.5">
                   {/* Product Name */}
-                  <h3 className="font-medium text-sm line-clamp-2 mb-1">
+                  <h3 className="font-medium text-sm line-clamp-2 mb-0.5">
                     {product.name}
                   </h3>
 
                   {/* SKU */}
-                  <p className="text-xs text-gray-500 mb-2">
+                  <p className="text-xs text-gray-500 mb-1.5">
                     {product.sku}
                   </p>
 
                   {/* Price and Stock */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-1.5">
                     <span className="text-lg font-bold text-blue-600">
                       {formatCurrency(product.price)}
                     </span>
@@ -141,7 +141,7 @@ export function POSProductGrid({
                   {/* Add Button */}
                   <Button
                     size="sm"
-                    className="w-full mt-2"
+                    className="w-full"
                     disabled={product.quantity <= 0}
                     onClick={(e) => {
                       e.stopPropagation()
