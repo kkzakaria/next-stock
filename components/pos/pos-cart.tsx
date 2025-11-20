@@ -5,7 +5,7 @@
  * Displays shopping cart with totals and checkout button
  */
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useCartStore, formatCurrency } from '@/lib/store/cart-store'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -30,6 +30,14 @@ export function POSCart({ storeId, cashierId, cashierName }: POSCartProps) {
   const getTotal = useCartStore((state) => state.getTotal)
 
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const cartItemsRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to bottom when new item is added
+  useEffect(() => {
+    if (cartItemsRef.current && items.length > 0) {
+      cartItemsRef.current.scrollTop = cartItemsRef.current.scrollHeight
+    }
+  }, [items.length])
 
   const subtotal = getSubtotal()
   const tax = getTax()
@@ -62,7 +70,7 @@ export function POSCart({ storeId, cashierId, cashierName }: POSCartProps) {
       </div>
 
       {/* Cart Items - Scrollable */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-2 space-y-2">
+      <div ref={cartItemsRef} className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-2 space-y-2">
         {items.length === 0 ? (
           <div className="flex h-full items-center justify-center text-gray-400">
             <div className="text-center">
