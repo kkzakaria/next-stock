@@ -7,6 +7,7 @@
 
 import { useState } from 'react'
 import { useCartStore } from '@/lib/store/cart-store'
+import { useHydrated } from '@/lib/hooks/use-hydrated'
 import { POSProductGrid } from './pos-product-grid'
 import { POSCart } from './pos-cart'
 import { Button } from '@/components/ui/button'
@@ -40,10 +41,11 @@ export function POSClient({
   cashierName,
 }: POSClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const hydrated = useHydrated()
   const storeItemCount = useCartStore((state) => state.getItemCount())
 
-  // Prevent hydration mismatch: use 0 during SSR, real value on client
-  const itemCount = typeof window === 'undefined' ? 0 : storeItemCount
+  // Prevent hydration mismatch: use 0 during SSR, real value after hydration
+  const itemCount = hydrated ? storeItemCount : 0
 
   // Filter products based on search query
   const filteredProducts = products.filter(

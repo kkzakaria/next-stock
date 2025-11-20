@@ -107,7 +107,7 @@ export function POSProductGrid({
                   )}
                 </div>
 
-                <div className="p-2 pt-1.5">
+                <div className="p-2 pt-1">
                   {/* Product Name */}
                   <h3 className="font-medium text-sm line-clamp-2 mb-0.5">
                     {product.name}
