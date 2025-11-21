@@ -12,7 +12,7 @@ import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react'
 import { POSCheckoutModal } from './pos-checkout-modal'
-import { POSReceipt } from './pos-receipt'
+import { POSReceiptGenerator } from './pos-receipt-generator'
 import { toast } from 'sonner'
 
 interface POSCartProps {
@@ -187,7 +187,7 @@ export function POSCart({ storeId, cashierId, cashierName }: POSCartProps) {
       />
 
       {/* Receipt Modal */}
-      <POSReceipt
+      <POSReceiptGenerator
         open={receiptOpen}
         onOpenChange={setReceiptOpen}
         saleId={currentSaleId}
