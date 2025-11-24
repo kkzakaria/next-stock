@@ -5,11 +5,14 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import bcrypt from 'bcryptjs'
 
 interface CloseSessionRequest {
   sessionId: string
   closingAmount: number
   notes?: string
+  managerId?: string
+  managerPin?: string
 }
 
 export async function POST(request: Request) {
@@ -89,6 +92,71 @@ export async function POST(request: Request) {
     // Calculate discrepancy
     const discrepancy = body.closingAmount - expectedClosing
 
+    // Check if manager validation is required (discrepancy detected)
+    const requiresApproval = discrepancy !== 0
+    let approvedBy: string | null = null
+
+    if (requiresApproval) {
+      // Manager validation required
+      if (!body.managerId || !body.managerPin) {
+        return NextResponse.json(
+          {
+            error: 'Manager approval required',
+            requiresApproval: true,
+            discrepancy: discrepancy,
+          },
+          { status: 400 }
+        )
+      }
+
+      // Validate manager credentials
+      const { data: manager, error: managerError } = await supabase
+        .from('profiles')
+        .select('id, full_name, role, pin_code, store_id')
+        .eq('id', body.managerId)
+        .single()
+
+      if (managerError || !manager) {
+        return NextResponse.json(
+          { error: 'Manager not found' },
+          { status: 404 }
+        )
+      }
+
+      // Check if user is a manager or admin
+      if (manager.role !== 'manager' && manager.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'User is not a manager or admin' },
+          { status: 403 }
+        )
+      }
+
+      // Check if manager has access to this store (admin has access to all)
+      if (manager.role === 'manager' && manager.store_id !== session.store_id) {
+        return NextResponse.json(
+          { error: 'Manager does not have access to this store' },
+          { status: 403 }
+        )
+      }
+
+      // Check if manager has set a PIN
+      if (!manager.pin_code) {
+        return NextResponse.json(
+          { error: 'Manager has not set a PIN code' },
+          { status: 400 }
+        )
+      }
+
+      // Validate PIN
+      const isValidPin = await bcrypt.compare(body.managerPin, manager.pin_code)
+
+      if (!isValidPin) {
+        return NextResponse.json({ error: 'Invalid PIN' }, { status: 401 })
+      }
+
+      approvedBy = manager.id
+    }
+
     // Update session to closed
     const { data: closedSession, error: updateError } = await supabase
       .from('cash_sessions')
@@ -99,6 +167,8 @@ export async function POST(request: Request) {
         closing_notes: body.notes || null,
         closed_at: new Date().toISOString(),
         status: 'closed',
+        requires_approval: requiresApproval,
+        approved_by: approvedBy,
       })
       .eq('id', body.sessionId)
       .select()

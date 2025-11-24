@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   Loader2,
   Wallet,
   CreditCard,
@@ -24,8 +31,14 @@ import {
   CheckCircle,
 } from 'lucide-react'
 import { Tables } from '@/types/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 type CashSession = Tables<'cash_sessions'>
+
+interface Manager {
+  id: string
+  full_name: string | null
+}
 
 interface CloseSessionDialogProps {
   open: boolean
@@ -44,6 +57,30 @@ export function CloseSessionDialog({
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [managers, setManagers] = useState<Manager[]>([])
+  const [managerId, setManagerId] = useState('')
+  const [managerPin, setManagerPin] = useState('')
+
+  // Fetch managers when dialog opens
+  useEffect(() => {
+    if (open && session) {
+      const fetchManagers = async () => {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('role', ['manager', 'admin'])
+          .or(`store_id.eq.${session.store_id},role.eq.admin`)
+          .order('full_name')
+
+        if (data) {
+          setManagers(data)
+        }
+      }
+
+      fetchManagers()
+    }
+  }, [open, session])
 
   if (!session) return null
 
@@ -62,6 +99,7 @@ export function CloseSessionDialog({
   // Calculate discrepancy if closing amount is entered
   const enteredAmount = parseFloat(closingAmount) || 0
   const discrepancy = closingAmount ? enteredAmount - expectedClosing : null
+  const requiresApproval = discrepancy !== null && discrepancy !== 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,6 +108,18 @@ export function CloseSessionDialog({
     if (!closingAmount) {
       setError('Veuillez entrer le montant final')
       return
+    }
+
+    // Check if manager approval is required
+    if (requiresApproval) {
+      if (!managerId) {
+        setError('Veuillez sélectionner un manager')
+        return
+      }
+      if (!managerPin) {
+        setError('Veuillez entrer le PIN du manager')
+        return
+      }
     }
 
     setLoading(true)
@@ -82,6 +132,8 @@ export function CloseSessionDialog({
           sessionId: session.id,
           closingAmount: parseFloat(closingAmount),
           notes: notes || undefined,
+          managerId: requiresApproval ? managerId : undefined,
+          managerPin: requiresApproval ? managerPin : undefined,
         }),
       })
 
@@ -230,6 +282,49 @@ export function CloseSessionDialog({
                         ? `Excédent: ${formatCurrency(discrepancy)}`
                         : `Manque: ${formatCurrency(Math.abs(discrepancy))}`}
                   </span>
+                </div>
+              </div>
+            )}
+
+            {/* Manager Approval Section - Only shown when discrepancy exists */}
+            {requiresApproval && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2 text-orange-800">
+                  <AlertTriangle className="h-5 w-5" />
+                  <h4 className="font-medium">Validation manager requise</h4>
+                </div>
+                <p className="text-sm text-orange-700">
+                  Un écart a été détecté. L&apos;approbation d&apos;un manager
+                  est nécessaire pour fermer la caisse.
+                </p>
+
+                <div className="space-y-2">
+                  <Label htmlFor="manager">Manager</Label>
+                  <Select value={managerId} onValueChange={setManagerId}>
+                    <SelectTrigger id="manager">
+                      <SelectValue placeholder="Sélectionner un manager" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {managers.map((manager) => (
+                        <SelectItem key={manager.id} value={manager.id}>
+                          {manager.full_name || 'Unknown'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="managerPin">PIN Manager</Label>
+                  <Input
+                    id="managerPin"
+                    type="password"
+                    inputMode="numeric"
+                    placeholder="Entrez le PIN"
+                    value={managerPin}
+                    onChange={(e) => setManagerPin(e.target.value)}
+                    maxLength={6}
+                  />
                 </div>
               </div>
             )}

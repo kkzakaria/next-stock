@@ -36,6 +36,8 @@ export type Database = {
     Tables: {
       cash_sessions: {
         Row: {
+          approval_notes: string | null
+          approved_by: string | null
           cashier_id: string
           closed_at: string | null
           closing_amount: number | null
@@ -47,6 +49,7 @@ export type Database = {
           opened_at: string
           opening_amount: number
           opening_notes: string | null
+          requires_approval: boolean
           status: Database["public"]["Enums"]["cash_session_status"]
           store_id: string
           total_card_sales: number
@@ -57,6 +60,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_notes?: string | null
+          approved_by?: string | null
           cashier_id: string
           closed_at?: string | null
           closing_amount?: number | null
@@ -68,6 +73,7 @@ export type Database = {
           opened_at?: string
           opening_amount?: number
           opening_notes?: string | null
+          requires_approval?: boolean
           status?: Database["public"]["Enums"]["cash_session_status"]
           store_id: string
           total_card_sales?: number
@@ -78,6 +84,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_notes?: string | null
+          approved_by?: string | null
           cashier_id?: string
           closed_at?: string | null
           closing_amount?: number | null
@@ -89,6 +97,7 @@ export type Database = {
           opened_at?: string
           opening_amount?: number
           opening_notes?: string | null
+          requires_approval?: boolean
           status?: Database["public"]["Enums"]["cash_session_status"]
           store_id?: string
           total_card_sales?: number
@@ -99,6 +108,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "cash_sessions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cash_sessions_cashier_id_fkey"
             columns: ["cashier_id"]
@@ -359,6 +375,7 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          pin_code: string | null
           role: Database["public"]["Enums"]["user_role"]
           store_id: string | null
           updated_at: string
@@ -369,6 +386,7 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          pin_code?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           store_id?: string | null
           updated_at?: string
@@ -379,6 +397,7 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          pin_code?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           store_id?: string | null
           updated_at?: string
