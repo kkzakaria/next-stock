@@ -24,17 +24,12 @@ import { RefundDialog } from './refund-dialog'
 interface SalesDataTableProps {
   sales: SaleWithDetails[]
   isLoading?: boolean
-  pageCount?: number
-  currentPage?: number
-  pageSize?: number
   onRefresh?: () => void
 }
 
 export function SalesDataTable({
   sales,
   isLoading = false,
-  pageCount,
-  pageSize = 10,
   onRefresh,
 }: SalesDataTableProps) {
   const [selectedSale, setSelectedSale] = useState<SaleWithDetails | null>(null)
@@ -270,11 +265,8 @@ export function SalesDataTable({
           ],
           enableExport: true,
         }}
-        pageSize={pageSize}
         pageSizeOptions={[10, 25, 50, 100]}
         emptyMessage="No sales found."
-        manualPagination={!!pageCount}
-        pageCount={pageCount}
       />
 
       {/* Sale Detail Dialog */}

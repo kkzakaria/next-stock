@@ -2,38 +2,23 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { SalesFilters } from './sales-filters'
-import { SalesPagination } from './sales-pagination'
 import { SalesDataTable } from './sales-data-table'
-import { useSaleFilters } from '@/lib/hooks/use-sale-filters'
 import { getSales, type SaleWithDetails } from '@/lib/actions/sales'
-import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-interface Store {
-  id: string
-  name: string
-}
-
 interface SalesClientProps {
-  stores: Store[]
   userStoreId?: string | null
   userRole: 'admin' | 'manager' | 'cashier'
 }
 
-export function SalesClient({ stores, userStoreId, userRole }: SalesClientProps) {
-  const { filters } = useSaleFilters()
+export function SalesClient({ userStoreId, userRole }: SalesClientProps) {
   const [sales, setSales] = useState<SaleWithDetails[]>([])
-  const [totalCount, setTotalCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
   // Debounce timer ref for realtime updates
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Calculate total pages
-  const totalPages = Math.ceil(totalCount / filters.limit)
 
   // Fetch sales data
   const fetchSales = useCallback(async () => {
@@ -42,20 +27,14 @@ export function SalesClient({ stores, userStoreId, userRole }: SalesClientProps)
 
     try {
       const result = await getSales({
-        search: filters.search,
-        status: filters.status as 'completed' | 'refunded' | 'pending' | null,
-        store: filters.store,
-        dateFrom: filters.dateFrom,
-        dateTo: filters.dateTo,
-        sortBy: filters.sortBy as 'created_at' | 'total_amount' | 'invoice_number',
-        sortOrder: filters.sortOrder,
-        page: filters.page,
-        limit: filters.limit,
+        sortBy: 'created_at',
+        sortOrder: 'desc',
+        page: 1,
+        limit: 1000, // Fetch all for client-side filtering
       })
 
       if (result.success && result.data) {
         setSales(result.data.sales)
-        setTotalCount(result.data.pagination.total)
       } else {
         setError(result.error || 'Failed to load sales')
         toast.error(result.error || 'Failed to load sales')
@@ -67,9 +46,9 @@ export function SalesClient({ stores, userStoreId, userRole }: SalesClientProps)
     } finally {
       setIsLoading(false)
     }
-  }, [filters])
+  }, [])
 
-  // Fetch sales when filters change
+  // Fetch sales on mount
   useEffect(() => {
     fetchSales()
   }, [fetchSales])
@@ -112,10 +91,7 @@ export function SalesClient({ stores, userStoreId, userRole }: SalesClientProps)
           filter: storeFilter,
         },
         () => {
-          // Add new sale to the list if on first page
-          if (filters.page === 1) {
-            debouncedRefresh()
-          }
+          debouncedRefresh()
         }
       )
       .on(
@@ -146,7 +122,7 @@ export function SalesClient({ stores, userStoreId, userRole }: SalesClientProps)
       }
       supabase.removeChannel(channel)
     }
-  }, [supabase, userStoreId, userRole, filters.page, fetchSales])
+  }, [supabase, userStoreId, userRole, fetchSales])
 
   // Handle refresh after refund
   const handleRefresh = useCallback(() => {
@@ -154,26 +130,7 @@ export function SalesClient({ stores, userStoreId, userRole }: SalesClientProps)
   }, [fetchSales])
 
   return (
-    <div className="space-y-6">
-      {/* Filters */}
-      <SalesFilters stores={stores} />
-
-      {/* Results Count */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          {isLoading ? (
-            <span className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading...
-            </span>
-          ) : (
-            <>
-              Showing {sales.length} of {totalCount} sales
-            </>
-          )}
-        </div>
-      </div>
-
+    <div className="space-y-4">
       {/* Error State */}
       {error && !isLoading && (
         <div className="rounded-md bg-destructive/10 p-4 text-center text-destructive">
@@ -185,15 +142,8 @@ export function SalesClient({ stores, userStoreId, userRole }: SalesClientProps)
       <SalesDataTable
         sales={sales}
         isLoading={isLoading}
-        pageCount={totalPages}
-        pageSize={filters.limit}
         onRefresh={handleRefresh}
       />
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <SalesPagination currentPage={filters.page} totalPages={totalPages} />
-      )}
     </div>
   )
 }
