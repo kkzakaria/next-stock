@@ -16,10 +16,10 @@ export default async function SalesPage({ searchParams }: SalesPageProps) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Get user profile to check role
+  // Get user profile to check role and store
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, store_id')
     .eq('id', user!.id)
     .single()
 
@@ -50,7 +50,11 @@ export default async function SalesPage({ searchParams }: SalesPageProps) {
         </p>
       </div>
 
-      <SalesClient stores={stores || []} />
+      <SalesClient
+        stores={stores || []}
+        userStoreId={profile?.store_id}
+        userRole={profile?.role as 'admin' | 'manager' | 'cashier'}
+      />
     </div>
   )
 }

@@ -1,26 +1,157 @@
-'use client';
+'use client'
 
-import { SalesFilters } from './sales-filters';
-import { SalesPagination } from './sales-pagination';
-import { useSaleFilters } from '@/lib/hooks/use-sale-filters';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { SalesFilters } from './sales-filters'
+import { SalesPagination } from './sales-pagination'
+import { SalesDataTable } from './sales-data-table'
+import { useSaleFilters } from '@/lib/hooks/use-sale-filters'
+import { getSales, type SaleWithDetails } from '@/lib/actions/sales'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface Store {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 interface SalesClientProps {
-  stores: Store[];
+  stores: Store[]
+  userStoreId?: string | null
+  userRole: 'admin' | 'manager' | 'cashier'
 }
 
-export function SalesClient({ stores }: SalesClientProps) {
-  const { filters } = useSaleFilters();
+export function SalesClient({ stores, userStoreId, userRole }: SalesClientProps) {
+  const { filters } = useSaleFilters()
+  const [sales, setSales] = useState<SaleWithDetails[]>([])
+  const [totalCount, setTotalCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const supabase = createClient()
 
-  // Placeholder for when sales data is implemented
-  const totalCount = 0;
-  const sales: unknown[] = [];
-  const totalPages = Math.ceil(totalCount / filters.limit);
+  // Debounce timer ref for realtime updates
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalCount / filters.limit)
+
+  // Fetch sales data
+  const fetchSales = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const result = await getSales({
+        search: filters.search,
+        status: filters.status as 'completed' | 'refunded' | 'pending' | null,
+        store: filters.store,
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
+        sortBy: filters.sortBy as 'created_at' | 'total_amount' | 'invoice_number',
+        sortOrder: filters.sortOrder,
+        page: filters.page,
+        limit: filters.limit,
+      })
+
+      if (result.success && result.data) {
+        setSales(result.data.sales)
+        setTotalCount(result.data.pagination.total)
+      } else {
+        setError(result.error || 'Failed to load sales')
+        toast.error(result.error || 'Failed to load sales')
+      }
+    } catch (err) {
+      console.error('Error fetching sales:', err)
+      setError('An unexpected error occurred')
+      toast.error('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [filters])
+
+  // Fetch sales when filters change
+  useEffect(() => {
+    fetchSales()
+  }, [fetchSales])
+
+  // Real-time subscription for sales updates
+  useEffect(() => {
+    // Debounced refresh function
+    const debouncedRefresh = () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        fetchSales()
+      }, 500) // 500ms delay to batch multiple changes
+    }
+
+    // Determine which store(s) to subscribe to
+    const storeFilter = userRole === 'manager' && userStoreId
+      ? `store_id=eq.${userStoreId}`
+      : undefined
+
+    // Subscribe to sales changes
+    const channel = supabase
+      .channel('sales-realtime')
+      // Broadcast for local dev
+      .on(
+        'broadcast',
+        { event: 'sale_created' },
+        () => {
+          debouncedRefresh()
+        }
+      )
+      // Postgres changes for production
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'sales',
+          filter: storeFilter,
+        },
+        () => {
+          // Add new sale to the list if on first page
+          if (filters.page === 1) {
+            debouncedRefresh()
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'sales',
+          filter: storeFilter,
+        },
+        (payload) => {
+          // Update sale in the list
+          setSales(prev =>
+            prev.map(sale =>
+              sale.id === payload.new.id
+                ? { ...sale, ...payload.new }
+                : sale
+            )
+          )
+        }
+      )
+      .subscribe()
+
+    // Cleanup on unmount
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, userStoreId, userRole, filters.page, fetchSales])
+
+  // Handle refresh after refund
+  const handleRefresh = useCallback(() => {
+    fetchSales()
+  }, [fetchSales])
 
   return (
     <div className="space-y-6">
@@ -28,38 +159,41 @@ export function SalesClient({ stores }: SalesClientProps) {
       <SalesFilters stores={stores} />
 
       {/* Results Count */}
-      <div className="text-sm text-muted-foreground">
-        Showing {sales.length} of {totalCount} sales
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading...
+            </span>
+          ) : (
+            <>
+              Showing {sales.length} of {totalCount} sales
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Placeholder for Sales Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Sales History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Sales management will be implemented in Phase 4. The filtering system is ready and will work once sales data is available.
-          </p>
-          <div className="mt-4 space-y-2 text-xs text-muted-foreground">
-            <p>Current filters:</p>
-            <ul className="list-disc list-inside space-y-1">
-              {filters.search && <li>Search: {filters.search}</li>}
-              {filters.status && <li>Status: {filters.status}</li>}
-              {filters.store && <li>Store: {filters.store}</li>}
-              {filters.dateFrom && <li>From: {filters.dateFrom.toLocaleDateString()}</li>}
-              {filters.dateTo && <li>To: {filters.dateTo.toLocaleDateString()}</li>}
-              <li>Sort: {filters.sortBy} ({filters.sortOrder})</li>
-              <li>Page: {filters.page} (showing {filters.limit} per page)</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="rounded-md bg-destructive/10 p-4 text-center text-destructive">
+          {error}
+        </div>
+      )}
+
+      {/* Sales Table */}
+      <SalesDataTable
+        sales={sales}
+        isLoading={isLoading}
+        pageCount={totalPages}
+        pageSize={filters.limit}
+        onRefresh={handleRefresh}
+      />
 
       {/* Pagination */}
       {totalPages > 1 && (
         <SalesPagination currentPage={filters.page} totalPages={totalPages} />
       )}
     </div>
-  );
+  )
 }
