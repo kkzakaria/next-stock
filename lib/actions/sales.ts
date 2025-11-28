@@ -88,11 +88,6 @@ export async function getSales(filters: SaleFilters): Promise<ActionResult<Sales
       return { success: false, error: 'Profile not found' }
     }
 
-    // Only admin and manager can view sales
-    if (!['admin', 'manager'].includes(profile.role)) {
-      return { success: false, error: 'Insufficient permissions' }
-    }
-
     // Build query
     let query = supabase
       .from('sales')
@@ -114,8 +109,11 @@ export async function getSales(filters: SaleFilters): Promise<ActionResult<Sales
         store:stores(id, name)
       `, { count: 'exact' })
 
-    // Filter by store based on role
-    if (profile.role === 'manager' && profile.store_id) {
+    // Filter by role
+    if (profile.role === 'cashier') {
+      // Cashiers can only see their own sales
+      query = query.eq('cashier_id', user.id)
+    } else if (profile.role === 'manager' && profile.store_id) {
       // Managers can only see their store's sales
       query = query.eq('store_id', profile.store_id)
     } else if (filters.store) {
@@ -204,8 +202,8 @@ export async function getSaleDetail(saleId: string): Promise<ActionResult<SaleDe
       .eq('id', user.id)
       .single()
 
-    if (!profile || !['admin', 'manager'].includes(profile.role)) {
-      return { success: false, error: 'Insufficient permissions' }
+    if (!profile) {
+      return { success: false, error: 'Profile not found' }
     }
 
     // Fetch sale with relations
@@ -225,6 +223,7 @@ export async function getSaleDetail(saleId: string): Promise<ActionResult<SaleDe
         refunded_at,
         notes,
         store_id,
+        cashier_id,
         cashier:profiles!sales_cashier_id_fkey(id, full_name, email),
         customer:customers(id, name),
         store:stores(id, name)
@@ -237,8 +236,14 @@ export async function getSaleDetail(saleId: string): Promise<ActionResult<SaleDe
       return { success: false, error: 'Sale not found' }
     }
 
-    // Managers can only view their store's sales
-    if (profile.role === 'manager' && profile.store_id && sale.store_id !== profile.store_id) {
+    // Access control based on role
+    if (profile.role === 'cashier') {
+      // Cashiers can only view their own sales
+      if (sale.cashier_id !== user.id) {
+        return { success: false, error: 'Access denied' }
+      }
+    } else if (profile.role === 'manager' && profile.store_id && sale.store_id !== profile.store_id) {
+      // Managers can only view their store's sales
       return { success: false, error: 'Access denied' }
     }
 

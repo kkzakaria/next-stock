@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SalesClient } from '@/components/sales/sales-client'
 
@@ -18,15 +17,11 @@ export default async function SalesPage() {
     .eq('id', user!.id)
     .single()
 
-  // Only admin and manager can access sales
-  if (!['admin', 'manager'].includes(profile?.role || '')) {
-    redirect('/dashboard')
-  }
-
   return (
     <SalesClient
       userStoreId={profile?.store_id}
       userRole={profile?.role as 'admin' | 'manager' | 'cashier'}
+      userId={user!.id}
     />
   )
 }

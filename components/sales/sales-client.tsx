@@ -9,13 +9,20 @@ import { toast } from 'sonner'
 interface SalesClientProps {
   userStoreId?: string | null
   userRole: 'admin' | 'manager' | 'cashier'
+  userId: string
 }
 
-export function SalesClient({ userStoreId, userRole }: SalesClientProps) {
+export function SalesClient({ userStoreId, userRole, userId }: SalesClientProps) {
+  const [mounted, setMounted] = useState(false)
   const [sales, setSales] = useState<SaleWithDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
+
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Debounce timer ref for realtime updates
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -65,10 +72,15 @@ export function SalesClient({ userStoreId, userRole }: SalesClientProps) {
       }, 500) // 500ms delay to batch multiple changes
     }
 
-    // Determine which store(s) to subscribe to
-    const storeFilter = userRole === 'manager' && userStoreId
-      ? `store_id=eq.${userStoreId}`
-      : undefined
+    // Determine filter for realtime subscription based on role
+    let realtimeFilter: string | undefined
+    if (userRole === 'cashier') {
+      // Cashiers only see their own sales
+      realtimeFilter = `cashier_id=eq.${userId}`
+    } else if (userRole === 'manager' && userStoreId) {
+      // Managers see their store's sales
+      realtimeFilter = `store_id=eq.${userStoreId}`
+    }
 
     // Subscribe to sales changes
     const channel = supabase
@@ -88,7 +100,7 @@ export function SalesClient({ userStoreId, userRole }: SalesClientProps) {
           event: 'INSERT',
           schema: 'public',
           table: 'sales',
-          filter: storeFilter,
+          filter: realtimeFilter,
         },
         () => {
           debouncedRefresh()
@@ -100,7 +112,7 @@ export function SalesClient({ userStoreId, userRole }: SalesClientProps) {
           event: 'UPDATE',
           schema: 'public',
           table: 'sales',
-          filter: storeFilter,
+          filter: realtimeFilter,
         },
         (payload) => {
           // Update sale in the list
@@ -122,12 +134,23 @@ export function SalesClient({ userStoreId, userRole }: SalesClientProps) {
       }
       supabase.removeChannel(channel)
     }
-  }, [supabase, userStoreId, userRole, fetchSales])
+  }, [supabase, userStoreId, userRole, userId, fetchSales])
 
   // Handle refresh after refund
   const handleRefresh = useCallback(() => {
     fetchSales()
   }, [fetchSales])
+
+  // Prevent hydration mismatch - render loading state on server
+  if (!mounted) {
+    return (
+      <div className="space-y-4">
+        <div className="flex h-[400px] items-center justify-center">
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
