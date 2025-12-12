@@ -90,7 +90,7 @@ export function CashSessionStatus({
         size="sm"
         variant="outline"
         onClick={onLockSession}
-        className="gap-1"
+        className="gap-1 border-amber-400 text-amber-700 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-500"
       >
         <Lock className="h-4 w-4" />
         {t('lock')}
