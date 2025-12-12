@@ -276,20 +276,22 @@ export function ProductsDataTable({
         return `${formatted} ${CURRENCY_CONFIG.symbol}`;
       },
     },
-    // For admins: single "Quantity" column showing total with popover
-    // For managers: two columns - "My Stock" and "Total Stock"
-    ...(isAdmin ? [
-      {
-        accessorKey: "quantity",
-        header: ({ column }: { column: import("@tanstack/react-table").Column<Product, unknown> }) => (
-          <DataTableColumnHeader column={column} title={t("columns.quantity")} />
-        ),
-        cell: ({ row }: { row: import("@tanstack/react-table").Row<Product> }) => {
-          const quantity = row.getValue("quantity") as number;
-          const minLevel = row.original.min_stock_level;
-          const productId = row.original.template_id;
-          const storeCount = row.original.store_count;
+    // Quantity column - displays differently for admin vs manager/cashier
+    // Admin: total(n) - e.g., "100(3)"
+    // Manager: my_stock/total(n) - e.g., "45/100(3)" with color on my_stock
+    {
+      accessorKey: "quantity",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t("columns.quantity")} />
+      ),
+      cell: ({ row }) => {
+        const productId = row.original.template_id;
+        const storeCount = row.original.store_count;
+        const minLevel = row.original.min_stock_level;
 
+        if (isAdmin) {
+          // Admin view: just show total with popover
+          const quantity = row.getValue("quantity") as number;
           return (
             <StockQuantityPopover
               productId={productId || ''}
@@ -298,50 +300,38 @@ export function ProductsDataTable({
               className={getStockColor(quantity, minLevel)}
             />
           );
-        },
-      } as ColumnDef<Product>,
-    ] : [
-      // Manager: "My Stock" column
-      {
-        accessorKey: "my_quantity",
-        id: "my_quantity",
-        header: ({ column }: { column: import("@tanstack/react-table").Column<Product, unknown> }) => (
-          <DataTableColumnHeader column={column} title={t("columns.myStock")} />
-        ),
-        cell: ({ row }: { row: import("@tanstack/react-table").Row<Product> }) => {
+        } else {
+          // Manager/Cashier view: show my_stock/total with popover on total
           const myQuantity = row.original.my_quantity ?? 0;
-          const minLevel = row.original.min_stock_level;
+          const totalQuantity = row.original.total_quantity ?? row.getValue("quantity") as number ?? 0;
 
+          // If only one store or my stock equals total, show simple view
+          if (!storeCount || storeCount <= 1 || myQuantity === totalQuantity) {
+            return (
+              <span className={getStockColor(myQuantity, minLevel)}>
+                {myQuantity}
+              </span>
+            );
+          }
+
+          // Show: my_stock / total(n)
           return (
-            <span className={getStockColor(myQuantity, minLevel)}>
-              {myQuantity}
+            <span className="flex items-center gap-0.5">
+              <span className={getStockColor(myQuantity, minLevel)}>
+                {myQuantity}
+              </span>
+              <span className="text-muted-foreground">/</span>
+              <StockQuantityPopover
+                productId={productId || ''}
+                quantity={totalQuantity}
+                storeCount={storeCount}
+                className="text-muted-foreground"
+              />
             </span>
           );
-        },
-      } as ColumnDef<Product>,
-      // Manager: "Total Stock" column with popover
-      {
-        accessorKey: "total_quantity",
-        id: "total_quantity",
-        header: ({ column }: { column: import("@tanstack/react-table").Column<Product, unknown> }) => (
-          <DataTableColumnHeader column={column} title={t("columns.totalStock")} />
-        ),
-        cell: ({ row }: { row: import("@tanstack/react-table").Row<Product> }) => {
-          const totalQuantity = row.original.total_quantity ?? 0;
-          const productId = row.original.template_id;
-          const storeCount = row.original.store_count;
-
-          return (
-            <StockQuantityPopover
-              productId={productId || ''}
-              quantity={totalQuantity}
-              storeCount={storeCount}
-              className="text-muted-foreground"
-            />
-          );
-        },
-      } as ColumnDef<Product>,
-    ]),
+        }
+      },
+    },
     {
       accessorKey: "is_active",
       header: ({ column }) => (
