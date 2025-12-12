@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ColumnDef, type ColumnFiltersState, type SortingState } from "@tanstack/react-table";
 import { MoreHorizontal, Pencil, Trash2, Eye, CheckCircle2, XCircle } from "lucide-react";
+import { StockQuantityPopover } from "./stock-quantity-popover";
 import { useTranslations } from "next-intl";
 import { DataTable } from "@/components/data-table";
 import { DataTableColumnHeader } from "@/components/data-table";
@@ -277,8 +278,16 @@ export function ProductsDataTable({
       cell: ({ row }) => {
         const quantity = row.getValue("quantity") as number;
         const minLevel = row.original.min_stock_level;
+        const productId = row.original.template_id;
+        const storeCount = row.original.store_count;
+
         return (
-          <span className={getStockColor(quantity, minLevel)}>{quantity}</span>
+          <StockQuantityPopover
+            productId={productId || ''}
+            quantity={quantity}
+            storeCount={storeCount}
+            className={getStockColor(quantity, minLevel)}
+          />
         );
       },
     },
