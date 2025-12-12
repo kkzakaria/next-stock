@@ -84,7 +84,7 @@ export function LockSessionDialog({
           <AlertDialogAction
             onClick={handleLock}
             disabled={loading}
-            className="bg-red-500 text-white hover:bg-red-600"
+            className="bg-amber-500 text-white hover:bg-amber-600"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             <Lock className="mr-2 h-4 w-4" />
