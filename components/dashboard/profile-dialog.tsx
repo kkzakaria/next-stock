@@ -17,14 +17,16 @@ import { Button } from '@/components/ui/button'
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSlot,
+  InputOTPSlotMasked,
 } from '@/components/ui/input-otp'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   Loader2,
   User,
   KeyRound,
   ShieldCheck,
   ShieldAlert,
+  EyeOff,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { updateProfile } from '@/lib/actions/profile'
@@ -371,6 +373,14 @@ export function ProfileDialog({
                 </div>
               ) : (
                 <form onSubmit={handlePinSubmit} className="space-y-6">
+                  {/* Security Warning */}
+                  <Alert className="border-amber-200 bg-amber-50 text-amber-800">
+                    <EyeOff className="h-4 w-4" />
+                    <AlertDescription>
+                      {t('pin.securityWarning')}
+                    </AlertDescription>
+                  </Alert>
+
                   {pinError && (
                     <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
                       {pinError}
@@ -385,12 +395,12 @@ export function ProfileDialog({
                       onChange={(value) => setPin(value)}
                     >
                       <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
+                        <InputOTPSlotMasked index={0} />
+                        <InputOTPSlotMasked index={1} />
+                        <InputOTPSlotMasked index={2} />
+                        <InputOTPSlotMasked index={3} />
+                        <InputOTPSlotMasked index={4} />
+                        <InputOTPSlotMasked index={5} />
                       </InputOTPGroup>
                     </InputOTP>
                   </div>
@@ -403,12 +413,12 @@ export function ProfileDialog({
                       onChange={(value) => setConfirmPin(value)}
                     >
                       <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
+                        <InputOTPSlotMasked index={0} />
+                        <InputOTPSlotMasked index={1} />
+                        <InputOTPSlotMasked index={2} />
+                        <InputOTPSlotMasked index={3} />
+                        <InputOTPSlotMasked index={4} />
+                        <InputOTPSlotMasked index={5} />
                       </InputOTPGroup>
                     </InputOTP>
                   </div>

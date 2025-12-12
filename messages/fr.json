@@ -1327,6 +1327,7 @@
       "notConfigured": "Aucun code PIN configuré",
       "notConfiguredDescriptionManager": "Configurez un code PIN pour approuver les fermetures de caisse et déverrouiller les caisses.",
       "notConfiguredDescriptionCashier": "Configurez un code PIN pour pouvoir déverrouiller votre caisse.",
+      "securityWarning": "Assurez-vous que personne ne vous observe pendant la saisie de votre code PIN. Ne partagez jamais votre code avec quiconque.",
       "configure": "Configurer le PIN",
       "modify": "Modifier le PIN",
       "modifyButton": "Modifier",

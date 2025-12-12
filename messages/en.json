@@ -1327,6 +1327,7 @@
       "notConfigured": "No PIN code configured",
       "notConfiguredDescriptionManager": "Configure a PIN code to approve cash register closings and unlock registers.",
       "notConfiguredDescriptionCashier": "Configure a PIN code to unlock your register.",
+      "securityWarning": "Make sure no one is watching you while entering your PIN code. Never share your code with anyone.",
       "configure": "Configure PIN",
       "modify": "Modify PIN",
       "modifyButton": "Modify",
