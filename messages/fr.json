@@ -1307,5 +1307,39 @@
     "tryAgain": "Réessayer",
     "goBack": "Retour",
     "goHome": "Accueil"
+  },
+
+  "ProfileDialog": {
+    "title": "Mon profil",
+    "description": "Gérez vos informations personnelles et paramètres de sécurité",
+    "tabs": {
+      "profile": "Profil",
+      "pin": "Code PIN"
+    },
+    "cancel": "Annuler",
+    "profile": {
+      "invalidUrl": "Format d'URL invalide"
+    },
+    "pin": {
+      "configured": "Code PIN configuré",
+      "configuredDescription": "Vous pouvez approuver les fermetures de caisse et déverrouiller les caisses.",
+      "notConfigured": "Aucun code PIN configuré",
+      "notConfiguredDescription": "Configurez un code PIN pour approuver les fermetures de caisse et déverrouiller les caisses.",
+      "configure": "Configurer le PIN",
+      "modify": "Modifier le PIN",
+      "modifyButton": "Modifier",
+      "createButton": "Créer",
+      "delete": "Supprimer",
+      "newPin": "Nouveau code PIN (6 chiffres)",
+      "confirmPin": "Confirmer le code PIN",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer votre code PIN ?",
+      "created": "Code PIN créé avec succès",
+      "modified": "Code PIN modifié avec succès",
+      "deleted": "Code PIN supprimé",
+      "deleteError": "Erreur lors de la suppression du PIN",
+      "error": "Une erreur est survenue",
+      "errorLength": "Le code PIN doit contenir 6 chiffres",
+      "errorMismatch": "Les codes PIN ne correspondent pas"
+    }
   }
 }

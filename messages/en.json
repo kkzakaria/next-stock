@@ -1307,5 +1307,39 @@
     "tryAgain": "Try again",
     "goBack": "Go back",
     "goHome": "Go home"
+  },
+
+  "ProfileDialog": {
+    "title": "My Profile",
+    "description": "Manage your personal information and security settings",
+    "tabs": {
+      "profile": "Profile",
+      "pin": "PIN Code"
+    },
+    "cancel": "Cancel",
+    "profile": {
+      "invalidUrl": "Invalid URL format"
+    },
+    "pin": {
+      "configured": "PIN code configured",
+      "configuredDescription": "You can approve cash register closings and unlock registers.",
+      "notConfigured": "No PIN code configured",
+      "notConfiguredDescription": "Configure a PIN code to approve cash register closings and unlock registers.",
+      "configure": "Configure PIN",
+      "modify": "Modify PIN",
+      "modifyButton": "Modify",
+      "createButton": "Create",
+      "delete": "Delete",
+      "newPin": "New PIN code (6 digits)",
+      "confirmPin": "Confirm PIN code",
+      "confirmDelete": "Are you sure you want to delete your PIN code?",
+      "created": "PIN code created successfully",
+      "modified": "PIN code modified successfully",
+      "deleted": "PIN code deleted",
+      "deleteError": "Error deleting PIN",
+      "error": "An error occurred",
+      "errorLength": "PIN code must be 6 digits",
+      "errorMismatch": "PIN codes do not match"
+    }
   }
 }
