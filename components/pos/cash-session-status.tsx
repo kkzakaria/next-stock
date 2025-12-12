@@ -100,8 +100,8 @@ export function CashSessionStatus({
         <AlertDialogTrigger asChild>
           <Button
             size="sm"
-            variant="destructive"
-            className="gap-1"
+            variant="outline"
+            className="gap-1 border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:text-orange-800 hover:border-orange-400"
           >
             <DoorOpen className="h-4 w-4" />
             {t('close')}
@@ -162,7 +162,7 @@ export function CashSessionStatus({
                     setDialogOpen(false)
                     onCloseSession()
                   }}
-                  className="bg-destructive text-white hover:bg-destructive/90"
+                  className="bg-orange-600 text-white hover:bg-orange-700"
                 >
                   <DoorOpen className="mr-2 h-4 w-4" />
                   {t('closeProceed')}
