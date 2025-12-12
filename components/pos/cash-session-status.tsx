@@ -90,7 +90,7 @@ export function CashSessionStatus({
         size="sm"
         variant="outline"
         onClick={onLockSession}
-        className="gap-1 border-orange-400 bg-orange-100 text-black hover:bg-orange-200 hover:border-orange-500"
+        className="gap-1"
       >
         <Lock className="h-4 w-4" />
         {t('lock')}
@@ -100,8 +100,7 @@ export function CashSessionStatus({
         <AlertDialogTrigger asChild>
           <Button
             size="sm"
-            variant="outline"
-            className="gap-1 border-orange-400 bg-orange-100 text-black hover:bg-orange-200 hover:border-orange-500"
+            className="gap-1 bg-orange-500 text-black hover:bg-orange-600"
           >
             <DoorOpen className="h-4 w-4" />
             {t('close')}
@@ -162,7 +161,7 @@ export function CashSessionStatus({
                     setDialogOpen(false)
                     onCloseSession()
                   }}
-                  className="bg-orange-600 text-white hover:bg-orange-700"
+                  className="bg-orange-500 text-black hover:bg-orange-600"
                 >
                   <DoorOpen className="mr-2 h-4 w-4" />
                   {t('closeProceed')}
