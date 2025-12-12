@@ -90,7 +90,7 @@ export function CashSessionStatus({
         size="sm"
         variant="outline"
         onClick={onLockSession}
-        className="gap-1 border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:text-orange-800 hover:border-orange-400"
+        className="gap-1 border-orange-400 bg-orange-100 text-black hover:bg-orange-200 hover:border-orange-500"
       >
         <Lock className="h-4 w-4" />
         {t('lock')}
@@ -101,7 +101,7 @@ export function CashSessionStatus({
           <Button
             size="sm"
             variant="outline"
-            className="gap-1 border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:text-orange-800 hover:border-orange-400"
+            className="gap-1 border-orange-400 bg-orange-100 text-black hover:bg-orange-200 hover:border-orange-500"
           >
             <DoorOpen className="h-4 w-4" />
             {t('close')}
