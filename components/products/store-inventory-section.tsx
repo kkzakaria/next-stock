@@ -164,6 +164,7 @@ export function StoreInventorySection({
         </div>
         {filteredAvailableStores.length > 0 && (
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={() => setShowAddDialog(true)}
@@ -238,7 +239,7 @@ export function StoreInventorySection({
 
             {pendingChanges.size > 0 && (
               <div className="flex justify-end pt-2">
-                <Button onClick={handleSaveChanges} disabled={isPending}>
+                <Button type="button" onClick={handleSaveChanges} disabled={isPending}>
                   {isPending ? t('saving') : t('saveChanges')}
                 </Button>
               </div>
