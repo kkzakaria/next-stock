@@ -67,8 +67,8 @@ export function StockQuantityPopover({
     }
   }
 
-  // If only one store or no store count info, just show the quantity
-  if (storeCount === 1 || storeCount === 0) {
+  // If no store count info (0 or null/undefined), just show the quantity without popover
+  if (!storeCount || storeCount === 0) {
     return <span className={className}>{quantity}</span>
   }
 
@@ -80,7 +80,7 @@ export function StockQuantityPopover({
           onMouseEnter={loadInventories}
         >
           {quantity}
-          {storeCount && storeCount > 1 && (
+          {storeCount > 1 && (
             <span className="ml-1 text-xs text-muted-foreground">
               ({storeCount})
             </span>
