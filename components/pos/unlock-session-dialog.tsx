@@ -22,7 +22,7 @@ import {
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSlot,
+  InputOTPSlotMasked,
 } from '@/components/ui/input-otp'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Unlock, UserCheck, ShieldCheck } from 'lucide-react'
@@ -183,12 +183,12 @@ export function UnlockSessionDialog({
                       disabled={loading}
                     >
                       <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
+                        <InputOTPSlotMasked index={0} />
+                        <InputOTPSlotMasked index={1} />
+                        <InputOTPSlotMasked index={2} />
+                        <InputOTPSlotMasked index={3} />
+                        <InputOTPSlotMasked index={4} />
+                        <InputOTPSlotMasked index={5} />
                       </InputOTPGroup>
                     </InputOTP>
                   </div>
@@ -242,12 +242,12 @@ export function UnlockSessionDialog({
                             disabled={loading}
                           >
                             <InputOTPGroup>
-                              <InputOTPSlot index={0} />
-                              <InputOTPSlot index={1} />
-                              <InputOTPSlot index={2} />
-                              <InputOTPSlot index={3} />
-                              <InputOTPSlot index={4} />
-                              <InputOTPSlot index={5} />
+                              <InputOTPSlotMasked index={0} />
+                              <InputOTPSlotMasked index={1} />
+                              <InputOTPSlotMasked index={2} />
+                              <InputOTPSlotMasked index={3} />
+                              <InputOTPSlotMasked index={4} />
+                              <InputOTPSlotMasked index={5} />
                             </InputOTPGroup>
                           </InputOTP>
                         </div>
@@ -313,12 +313,12 @@ export function UnlockSessionDialog({
                           disabled={loading}
                         >
                           <InputOTPGroup>
-                            <InputOTPSlot index={0} />
-                            <InputOTPSlot index={1} />
-                            <InputOTPSlot index={2} />
-                            <InputOTPSlot index={3} />
-                            <InputOTPSlot index={4} />
-                            <InputOTPSlot index={5} />
+                            <InputOTPSlotMasked index={0} />
+                            <InputOTPSlotMasked index={1} />
+                            <InputOTPSlotMasked index={2} />
+                            <InputOTPSlotMasked index={3} />
+                            <InputOTPSlotMasked index={4} />
+                            <InputOTPSlotMasked index={5} />
                           </InputOTPGroup>
                         </InputOTP>
                       </div>
