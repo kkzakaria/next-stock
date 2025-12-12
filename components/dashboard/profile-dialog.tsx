@@ -63,7 +63,9 @@ export function ProfileDialog({
   const [showPinForm, setShowPinForm] = useState(false)
   const [pinError, setPinError] = useState<string | null>(null)
 
-  const canHavePin = ['manager', 'admin'].includes(userRole)
+  // All users can have a PIN (cashiers need it to unlock their register)
+  const canHavePin = true
+  const isManagerOrAdmin = ['manager', 'admin'].includes(userRole)
 
   // Profile form
   const form = useForm({
@@ -341,8 +343,12 @@ export function ProfileDialog({
                       </p>
                       <p className="text-sm opacity-80">
                         {hasPin
-                          ? t('pin.configuredDescription')
-                          : t('pin.notConfiguredDescription')}
+                          ? (isManagerOrAdmin
+                              ? t('pin.configuredDescriptionManager')
+                              : t('pin.configuredDescriptionCashier'))
+                          : (isManagerOrAdmin
+                              ? t('pin.notConfiguredDescriptionManager')
+                              : t('pin.notConfiguredDescriptionCashier'))}
                       </p>
                     </div>
                   </div>

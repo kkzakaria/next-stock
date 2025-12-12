@@ -1322,9 +1322,11 @@
     },
     "pin": {
       "configured": "PIN code configured",
-      "configuredDescription": "You can approve cash register closings and unlock registers.",
+      "configuredDescriptionManager": "You can approve cash register closings with discrepancies and unlock registers.",
+      "configuredDescriptionCashier": "You can unlock your register with your PIN code.",
       "notConfigured": "No PIN code configured",
-      "notConfiguredDescription": "Configure a PIN code to approve cash register closings and unlock registers.",
+      "notConfiguredDescriptionManager": "Configure a PIN code to approve cash register closings and unlock registers.",
+      "notConfiguredDescriptionCashier": "Configure a PIN code to unlock your register.",
       "configure": "Configure PIN",
       "modify": "Modify PIN",
       "modifyButton": "Modify",

@@ -1322,9 +1322,11 @@
     },
     "pin": {
       "configured": "Code PIN configuré",
-      "configuredDescription": "Vous pouvez approuver les fermetures de caisse et déverrouiller les caisses.",
+      "configuredDescriptionManager": "Vous pouvez approuver les fermetures de caisse avec écart et déverrouiller les caisses.",
+      "configuredDescriptionCashier": "Vous pouvez déverrouiller votre caisse avec votre code PIN.",
       "notConfigured": "Aucun code PIN configuré",
-      "notConfiguredDescription": "Configurez un code PIN pour approuver les fermetures de caisse et déverrouiller les caisses.",
+      "notConfiguredDescriptionManager": "Configurez un code PIN pour approuver les fermetures de caisse et déverrouiller les caisses.",
+      "notConfiguredDescriptionCashier": "Configurez un code PIN pour pouvoir déverrouiller votre caisse.",
       "configure": "Configurer le PIN",
       "modify": "Modifier le PIN",
       "modifyButton": "Modifier",

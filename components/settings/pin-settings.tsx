@@ -31,8 +31,9 @@ export function PinSettings({ userRole }: PinSettingsProps) {
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Only managers and admins can have a PIN
-  const canHavePin = ['manager', 'admin'].includes(userRole)
+  // All users can have a PIN (cashiers need it to unlock their register)
+  const canHavePin = true
+  const isManagerOrAdmin = ['manager', 'admin'].includes(userRole)
 
   useEffect(() => {
     if (canHavePin) {
@@ -142,7 +143,7 @@ export function PinSettings({ userRole }: PinSettingsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <KeyRound className="h-5 w-5" />
-            Code PIN de validation
+            Code PIN de sécurité
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-8">
@@ -157,12 +158,12 @@ export function PinSettings({ userRole }: PinSettingsProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <KeyRound className="h-5 w-5" />
-          Code PIN de validation
+          Code PIN de sécurité
         </CardTitle>
         <CardDescription>
-          Ce code PIN à 6 chiffres est utilisé pour approuver les fermetures de
-          caisse avec écart. Vous devrez le saisir lorsqu&apos;un caissier demande
-          votre validation.
+          {isManagerOrAdmin
+            ? "Ce code PIN à 6 chiffres est utilisé pour approuver les fermetures de caisse avec écart et déverrouiller les caisses."
+            : "Ce code PIN à 6 chiffres est utilisé pour déverrouiller votre caisse."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -189,8 +190,12 @@ export function PinSettings({ userRole }: PinSettingsProps) {
                 </p>
                 <p className="text-sm opacity-80">
                   {hasPin
-                    ? 'Vous pouvez approuver les fermetures de caisse avec écart.'
-                    : 'Configurez un code PIN pour pouvoir approuver les fermetures de caisse.'}
+                    ? (isManagerOrAdmin
+                        ? 'Vous pouvez approuver les fermetures de caisse et déverrouiller les caisses.'
+                        : 'Vous pouvez déverrouiller votre caisse avec votre code PIN.')
+                    : (isManagerOrAdmin
+                        ? 'Configurez un code PIN pour approuver les fermetures de caisse et déverrouiller les caisses.'
+                        : 'Configurez un code PIN pour pouvoir déverrouiller votre caisse.')}
                 </p>
               </div>
             </div>
