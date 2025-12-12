@@ -164,6 +164,8 @@
       "price": "Prix",
       "cost": "Coût",
       "quantity": "Quantité",
+      "myStock": "Mon Stock",
+      "totalStock": "Stock Total",
       "status": "Statut",
       "minStock": "Stock minimum",
       "description": "Description"

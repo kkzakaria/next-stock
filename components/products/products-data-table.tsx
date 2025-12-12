@@ -63,6 +63,8 @@ interface Product {
   // Aggregated view fields
   store_count?: number | null;
   total_quantity?: number | null;
+  // Manager/cashier specific: my store's quantity
+  my_quantity?: number | null;
 }
 
 interface ProductsDataTableProps {
@@ -72,6 +74,8 @@ interface ProductsDataTableProps {
   currentPage?: number;
   pageSize?: number;
   onPaginationChange?: (pageIndex: number, pageSize: number) => void;
+  // User role to determine column visibility
+  userRole?: string | null;
   // Initial state from URL
   initialColumnFilters?: ColumnFiltersState;
   initialSorting?: SortingState;
@@ -84,11 +88,13 @@ export function ProductsDataTable({
   pageCount,
   pageSize,
   onPaginationChange,
+  userRole,
   // Initial state from URL
   initialColumnFilters = [],
   initialSorting = [],
   initialPagination = { pageIndex: 0, pageSize: 10 },
 }: ProductsDataTableProps) {
+  const isAdmin = userRole === 'admin';
   const t = useTranslations("Products");
   const tCommon = useTranslations("Common");
   const router = useRouter();
@@ -270,27 +276,72 @@ export function ProductsDataTable({
         return `${formatted} ${CURRENCY_CONFIG.symbol}`;
       },
     },
-    {
-      accessorKey: "quantity",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t("columns.quantity")} />
-      ),
-      cell: ({ row }) => {
-        const quantity = row.getValue("quantity") as number;
-        const minLevel = row.original.min_stock_level;
-        const productId = row.original.template_id;
-        const storeCount = row.original.store_count;
+    // For admins: single "Quantity" column showing total with popover
+    // For managers: two columns - "My Stock" and "Total Stock"
+    ...(isAdmin ? [
+      {
+        accessorKey: "quantity",
+        header: ({ column }: { column: import("@tanstack/react-table").Column<Product, unknown> }) => (
+          <DataTableColumnHeader column={column} title={t("columns.quantity")} />
+        ),
+        cell: ({ row }: { row: import("@tanstack/react-table").Row<Product> }) => {
+          const quantity = row.getValue("quantity") as number;
+          const minLevel = row.original.min_stock_level;
+          const productId = row.original.template_id;
+          const storeCount = row.original.store_count;
 
-        return (
-          <StockQuantityPopover
-            productId={productId || ''}
-            quantity={quantity}
-            storeCount={storeCount}
-            className={getStockColor(quantity, minLevel)}
-          />
-        );
-      },
-    },
+          return (
+            <StockQuantityPopover
+              productId={productId || ''}
+              quantity={quantity}
+              storeCount={storeCount}
+              className={getStockColor(quantity, minLevel)}
+            />
+          );
+        },
+      } as ColumnDef<Product>,
+    ] : [
+      // Manager: "My Stock" column
+      {
+        accessorKey: "my_quantity",
+        id: "my_quantity",
+        header: ({ column }: { column: import("@tanstack/react-table").Column<Product, unknown> }) => (
+          <DataTableColumnHeader column={column} title={t("columns.myStock")} />
+        ),
+        cell: ({ row }: { row: import("@tanstack/react-table").Row<Product> }) => {
+          const myQuantity = row.original.my_quantity ?? 0;
+          const minLevel = row.original.min_stock_level;
+
+          return (
+            <span className={getStockColor(myQuantity, minLevel)}>
+              {myQuantity}
+            </span>
+          );
+        },
+      } as ColumnDef<Product>,
+      // Manager: "Total Stock" column with popover
+      {
+        accessorKey: "total_quantity",
+        id: "total_quantity",
+        header: ({ column }: { column: import("@tanstack/react-table").Column<Product, unknown> }) => (
+          <DataTableColumnHeader column={column} title={t("columns.totalStock")} />
+        ),
+        cell: ({ row }: { row: import("@tanstack/react-table").Row<Product> }) => {
+          const totalQuantity = row.original.total_quantity ?? 0;
+          const productId = row.original.template_id;
+          const storeCount = row.original.store_count;
+
+          return (
+            <StockQuantityPopover
+              productId={productId || ''}
+              quantity={totalQuantity}
+              storeCount={storeCount}
+              className="text-muted-foreground"
+            />
+          );
+        },
+      } as ColumnDef<Product>,
+    ]),
     {
       accessorKey: "is_active",
       header: ({ column }) => (
