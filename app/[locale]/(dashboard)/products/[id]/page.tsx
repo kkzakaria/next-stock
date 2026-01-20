@@ -107,7 +107,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           </CardHeader>
           <CardContent className="space-y-4">
             {product.image_url && (
-              <div className="relative h-48 w-full overflow-hidden rounded-lg border">
+              <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-lg border">
                 <OptimizedImage
                   src={product.image_url}
                   alt={product.name}
@@ -118,7 +118,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             )}
 
             {!product.image_url && (
-              <div className="flex h-48 w-full items-center justify-center rounded-lg border bg-muted">
+              <div className="flex aspect-square w-full max-w-xs items-center justify-center rounded-lg border bg-muted">
                 <Package className="h-16 w-16 text-muted-foreground" />
               </div>
             )}
