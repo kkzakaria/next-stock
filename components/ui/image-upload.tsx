@@ -10,7 +10,6 @@ import {
 } from 'react'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -184,6 +183,20 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
       setIsPreviewOpen(true)
     }, [])
 
+    // Check if browser supports AVIF
+    const checkAvifSupport = useCallback(async (): Promise<boolean> => {
+      if (typeof window === 'undefined') return false
+
+      return new Promise((resolve) => {
+        const img = new window.Image()
+        img.onload = () => resolve(true)
+        img.onerror = () => resolve(false)
+        // Tiny AVIF image
+        img.src =
+          'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKBxgABnQQEDQgMgkQAAAAAPdaUH7wXJc='
+      })
+    }, [])
+
     // Expose upload method to parent
     useImperativeHandle(
       ref,
@@ -195,37 +208,36 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
           setError(null)
 
           try {
-            const supabase = createClient()
+            // Check AVIF support
+            const supportsAvif = await checkAvifSupport()
 
-            // Generate unique filename
-            const ext = file.name.split('.').pop() || 'jpg'
-            const filename = `${path}/${Date.now()}.${ext}`
+            // Create form data
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('bucket', bucket)
+            formData.append('path', path)
+            formData.append('supportsAvif', supportsAvif.toString())
 
-            // Upload to Supabase Storage
-            const { data, error: uploadError } = await supabase.storage
-              .from(bucket)
-              .upload(filename, file, {
-                cacheControl: '3600',
-                upsert: false,
-              })
+            // Upload via API route (handles conversion to AVIF/WebP)
+            const response = await fetch('/api/upload-image', {
+              method: 'POST',
+              body: formData,
+            })
 
-            if (uploadError) {
-              console.error('Upload error:', uploadError)
+            const result = await response.json()
+
+            if (!result.success) {
+              console.error('Upload error:', result.error)
               setError(t('errors.uploadFailed'))
               return null
             }
 
-            // Get public URL
-            const {
-              data: { publicUrl },
-            } = supabase.storage.from(bucket).getPublicUrl(data.path)
-
             // Clear the pending file after successful upload
             setFile(null)
             onFileSelect?.(null)
-            onValueChange?.(publicUrl)
+            onValueChange?.(result.url)
 
-            return publicUrl
+            return result.url
           } catch (err) {
             console.error('Upload error:', err)
             setError(t('errors.uploadFailed'))
@@ -239,7 +251,7 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
           handleFile(null)
         },
       }),
-      [file, t, onFileSelect, onValueChange, handleFile]
+      [file, t, onFileSelect, onValueChange, handleFile, checkAvifSupport]
     )
 
     // Determine what to display

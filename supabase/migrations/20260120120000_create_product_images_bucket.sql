@@ -5,7 +5,7 @@ VALUES (
   'product-images',
   true,
   5242880, -- 5MB limit
-  ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']
 )
 ON CONFLICT (id) DO NOTHING;
 
