@@ -183,20 +183,6 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
       setIsPreviewOpen(true)
     }, [])
 
-    // Check if browser supports AVIF
-    const checkAvifSupport = useCallback(async (): Promise<boolean> => {
-      if (typeof window === 'undefined') return false
-
-      return new Promise((resolve) => {
-        const img = new window.Image()
-        img.onload = () => resolve(true)
-        img.onerror = () => resolve(false)
-        // Tiny AVIF image
-        img.src =
-          'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKBxgABnQQEDQgMgkQAAAAAPdaUH7wXJc='
-      })
-    }, [])
-
     // Expose upload method to parent
     useImperativeHandle(
       ref,
@@ -208,17 +194,13 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
           setError(null)
 
           try {
-            // Check AVIF support
-            const supportsAvif = await checkAvifSupport()
-
             // Create form data
             const formData = new FormData()
             formData.append('file', file)
             formData.append('bucket', bucket)
             formData.append('path', path)
-            formData.append('supportsAvif', supportsAvif.toString())
 
-            // Upload via API route (handles conversion to AVIF/WebP)
+            // Upload via API route (converts to AVIF)
             const response = await fetch('/api/upload-image', {
               method: 'POST',
               body: formData,
@@ -251,7 +233,7 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
           handleFile(null)
         },
       }),
-      [file, t, onFileSelect, onValueChange, handleFile, checkAvifSupport]
+      [file, t, onFileSelect, onValueChange, handleFile]
     )
 
     // Determine what to display

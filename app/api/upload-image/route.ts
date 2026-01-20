@@ -3,10 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import sharp from 'sharp'
 
 // Supported input formats
-const SUPPORTED_FORMATS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-
-// Check if browser supports AVIF (passed from client)
-type OutputFormat = 'avif' | 'webp'
+const SUPPORTED_FORMATS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']
 
 interface UploadResponse {
   success: boolean
@@ -32,7 +29,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<UploadRes
     const file = formData.get('file') as File | null
     const bucket = formData.get('bucket') as string | null
     const path = formData.get('path') as string | null
-    const supportsAvif = formData.get('supportsAvif') === 'true'
 
     if (!file || !bucket || !path) {
       return NextResponse.json(
@@ -53,11 +49,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<UploadRes
     const arrayBuffer = await file.arrayBuffer()
     const inputBuffer = Buffer.from(arrayBuffer)
 
-    // Determine output format based on browser support
-    const outputFormat: OutputFormat = supportsAvif ? 'avif' : 'webp'
-    const outputExtension = outputFormat
-    const outputMimeType = `image/${outputFormat}`
-
     // Process image with Sharp
     let sharpInstance = sharp(inputBuffer)
 
@@ -76,31 +67,20 @@ export async function POST(request: NextRequest): Promise<NextResponse<UploadRes
       }
     }
 
-    // Convert to target format with optimized settings
-    let outputBuffer: Buffer
-
-    if (outputFormat === 'avif') {
-      outputBuffer = await sharpInstance
-        .avif({
-          quality: 75,
-          effort: 4, // Balance between speed and compression (0-9)
-        })
-        .toBuffer()
-    } else {
-      outputBuffer = await sharpInstance
-        .webp({
-          quality: 80,
-          effort: 4,
-        })
-        .toBuffer()
-    }
+    // Convert to AVIF format (Next.js handles browser compatibility at render time)
+    const outputBuffer = await sharpInstance
+      .avif({
+        quality: 75,
+        effort: 4, // Balance between speed and compression (0-9)
+      })
+      .toBuffer()
 
     // Generate unique filename
-    const filename = `${path}/${Date.now()}.${outputExtension}`
+    const filename = `${path}/${Date.now()}.avif`
 
     // Upload to Supabase Storage
     const { data, error: uploadError } = await supabase.storage.from(bucket).upload(filename, outputBuffer, {
-      contentType: outputMimeType,
+      contentType: 'image/avif',
       cacheControl: '31536000', // 1 year cache
       upsert: false,
     })
