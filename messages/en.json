@@ -1430,10 +1430,13 @@
     "dragDrop": "Drag & drop an image here",
     "or": "or",
     "clickToSelect": "click to select",
+    "clickToChange": "Click to change image",
     "maxSize": "Max {maxSize}MB",
     "uploading": "Uploading...",
     "pendingUpload": "Image will be uploaded on save",
     "remove": "Remove",
+    "viewFull": "View",
+    "previewTitle": "Image preview",
     "errors": {
       "tooLarge": "File is too large. Maximum size is {maxSize}MB.",
       "invalidType": "Invalid file type. Accepted types: JPEG, PNG, WebP, GIF.",

@@ -12,7 +12,12 @@ import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { ImageIcon, Upload, X, Loader2 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { ImageIcon, Upload, X, Loader2, ZoomIn } from 'lucide-react'
 import Image from 'next/image'
 
 const DEFAULT_MAX_SIZE = 5 * 1024 * 1024 // 5MB
@@ -54,6 +59,7 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
     const [isDragging, setIsDragging] = useState(false)
     const [isUploading, setIsUploading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
     // Cleanup preview URL on unmount
     useEffect(() => {
@@ -173,6 +179,11 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
       [handleFile, onValueChange]
     )
 
+    const handleOpenPreview = useCallback((e: React.MouseEvent) => {
+      e.stopPropagation()
+      setIsPreviewOpen(true)
+    }, [])
+
     // Expose upload method to parent
     useImperativeHandle(
       ref,
@@ -235,85 +246,128 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
     const displayUrl = previewUrl || value
 
     return (
-      <div className={cn('space-y-2', className)}>
-        <div
-          onClick={handleClick}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={cn(
-            'relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors cursor-pointer',
-            isDragging && 'border-primary bg-primary/5',
-            !isDragging && !disabled && 'border-muted-foreground/25 hover:border-primary/50',
-            disabled && 'cursor-not-allowed opacity-50',
-            displayUrl && 'p-2'
-          )}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={acceptedTypes.join(',')}
-            onChange={handleInputChange}
-            disabled={disabled || isUploading}
-            className="hidden"
-          />
+      <>
+        <div className={cn('space-y-2', className)}>
+          <div
+            onClick={handleClick}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={cn(
+              'relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors cursor-pointer',
+              isDragging && 'border-primary bg-primary/5',
+              !isDragging && !disabled && 'border-muted-foreground/25 hover:border-primary/50',
+              disabled && 'cursor-not-allowed opacity-50',
+              displayUrl && 'p-4'
+            )}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={acceptedTypes.join(',')}
+              onChange={handleInputChange}
+              disabled={disabled || isUploading}
+              className="hidden"
+            />
 
-          {isUploading ? (
-            <div className="flex flex-col items-center gap-2 py-4">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">{t('uploading')}</span>
-            </div>
-          ) : displayUrl ? (
-            <div className="relative w-full">
-              <div className="relative aspect-video w-full overflow-hidden rounded-md">
+            {isUploading ? (
+              <div className="flex flex-col items-center gap-2 py-4">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{t('uploading')}</span>
+              </div>
+            ) : displayUrl ? (
+              <div className="flex items-center gap-4">
+                {/* Thumbnail */}
+                <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border bg-muted">
+                  <Image
+                    src={displayUrl}
+                    alt="Preview"
+                    fill
+                    className="object-cover"
+                    unoptimized={displayUrl.startsWith('blob:')}
+                  />
+                </div>
+
+                {/* Actions and info */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8"
+                      onClick={handleOpenPreview}
+                    >
+                      <ZoomIn className="mr-1.5 h-3.5 w-3.5" />
+                      {t('viewFull')}
+                    </Button>
+                    {!disabled && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={handleRemove}
+                      >
+                        <X className="mr-1.5 h-3.5 w-3.5" />
+                        {t('remove')}
+                      </Button>
+                    )}
+                  </div>
+                  {file && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('pendingUpload')}
+                    </p>
+                  )}
+                  {!disabled && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('clickToChange')}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <div className="rounded-full bg-muted p-3">
+                  {isDragging ? (
+                    <Upload className="h-6 w-6 text-primary" />
+                  ) : (
+                    <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-medium">{t('dragDrop')}</p>
+                  <p className="text-xs text-muted-foreground">{t('or')}</p>
+                  <p className="text-xs text-primary underline">{t('clickToSelect')}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t('maxSize', { maxSize: Math.round(maxSize / 1024 / 1024) })}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+        </div>
+
+        {/* Full-size preview dialog */}
+        <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+          <DialogContent className="max-w-3xl p-0 overflow-hidden">
+            <DialogTitle className="sr-only">{t('previewTitle')}</DialogTitle>
+            {displayUrl && (
+              <div className="relative aspect-video w-full">
                 <Image
                   src={displayUrl}
-                  alt="Preview"
+                  alt="Full preview"
                   fill
                   className="object-contain"
                   unoptimized={displayUrl.startsWith('blob:')}
                 />
               </div>
-              {!disabled && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute -right-2 -top-2 h-6 w-6 rounded-full"
-                  onClick={handleRemove}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-              {file && (
-                <p className="mt-2 text-center text-xs text-muted-foreground">
-                  {t('pendingUpload')}
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2">
-              <div className="rounded-full bg-muted p-3">
-                {isDragging ? (
-                  <Upload className="h-6 w-6 text-primary" />
-                ) : (
-                  <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                )}
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-medium">{t('dragDrop')}</p>
-                <p className="text-xs text-muted-foreground">{t('or')}</p>
-                <p className="text-xs text-primary underline">{t('clickToSelect')}</p>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {t('maxSize', { maxSize: Math.round(maxSize / 1024 / 1024) })}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-      </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </>
     )
   }
 )
