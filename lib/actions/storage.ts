@@ -13,7 +13,7 @@ interface ActionResult<T = unknown> {
  * Example: https://xxx.supabase.co/storage/v1/object/public/product-images/products/123/1234567890.jpg
  * Returns: products/123/1234567890.jpg
  */
-export function extractPathFromUrl(url: string): { bucket: string; path: string } | null {
+function extractPathFromUrl(url: string): { bucket: string; path: string } | null {
   try {
     const urlObj = new URL(url)
     const pathname = urlObj.pathname
