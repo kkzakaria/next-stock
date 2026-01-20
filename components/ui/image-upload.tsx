@@ -306,7 +306,7 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="h-8 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                        className="h-8 border-destructive/50 text-destructive hover:bg-destructive hover:text-white hover:border-destructive"
                         onClick={handleRemove}
                       >
                         <X className="mr-1.5 h-3.5 w-3.5" />
