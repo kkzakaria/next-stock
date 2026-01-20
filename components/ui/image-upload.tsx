@@ -352,18 +352,15 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
 
         {/* Full-size preview dialog */}
         <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-          <DialogContent className="max-w-3xl p-0 overflow-hidden">
+          <DialogContent className="max-w-[90vw] max-h-[90vh] w-fit p-2 overflow-hidden">
             <DialogTitle className="sr-only">{t('previewTitle')}</DialogTitle>
             {displayUrl && (
-              <div className="relative aspect-video w-full">
-                <Image
-                  src={displayUrl}
-                  alt="Full preview"
-                  fill
-                  className="object-contain"
-                  unoptimized={displayUrl.startsWith('blob:')}
-                />
-              </div>
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={displayUrl}
+                alt="Full preview"
+                className="max-w-full max-h-[85vh] object-contain"
+              />
             )}
           </DialogContent>
         </Dialog>
