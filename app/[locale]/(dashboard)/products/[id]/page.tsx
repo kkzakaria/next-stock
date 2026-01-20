@@ -1,6 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/optimized-image'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -108,7 +108,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <CardContent className="space-y-4">
             {product.image_url && (
               <div className="relative h-48 w-full overflow-hidden rounded-lg border">
-                <Image
+                <OptimizedImage
                   src={product.image_url}
                   alt={product.name}
                   fill
