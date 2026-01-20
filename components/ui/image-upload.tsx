@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ImageIcon, Upload, X, Loader2, ZoomIn } from 'lucide-react'
-import Image from 'next/image'
+import { OptimizedImage } from '@/components/ui/optimized-image'
 
 const DEFAULT_MAX_SIZE = 5 * 1024 * 1024 // 5MB
 const DEFAULT_ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
@@ -273,7 +273,7 @@ export const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
               <div className="flex items-center gap-4">
                 {/* Thumbnail */}
                 <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border bg-muted">
-                  <Image
+                  <OptimizedImage
                     src={displayUrl}
                     alt="Preview"
                     fill
